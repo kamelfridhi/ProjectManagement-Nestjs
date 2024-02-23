@@ -27,7 +27,7 @@ export class TaskService extends BaseService<Task> {
     }
 
     async updateTask(id: string, updateTaskDto: UpdateTaskDto) {
-
+        return super.update(id, updateTaskDto);
     }
 
     async deleteTask(id: string) {

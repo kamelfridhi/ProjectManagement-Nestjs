@@ -14,11 +14,11 @@ export class UpdateTaskDto {
 
     @IsOptional()
     @IsDateString()
-    startDate?: string;
+    startDate?: Date;
 
     @IsOptional()
     @IsDateString()
-    endDate?: string;
+    endDate?: Date;
 
     @IsOptional()
     @IsEnum(TaskPriority)
