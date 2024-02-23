@@ -4,16 +4,18 @@ import { Model } from 'mongoose';
 import { Task } from 'src/schemas/task.schema';
 import { CreateTaskDto } from './dto/createTask.dto';
 import { UpdateTaskDto } from './dto/updateTask.dto';
+import {BaseService} from "../../global-utils/base.service";
 
 @Injectable()
-export class TaskService {
+export class TaskService extends BaseService<Task> {
     constructor(
         @InjectModel(Task.name) private taskModel: Model<Task>,
-    ) {}
+    ) {
+        super(taskModel);
+    }
 
     async createTask(createTaskDto: CreateTaskDto) {
-        const newTask = new this.taskModel(createTaskDto);
-        return newTask.save();
+        return super.create(createTaskDto)
     }
 
     getAllTasks() {
@@ -25,8 +27,7 @@ export class TaskService {
     }
 
     async updateTask(id: string, updateTaskDto: UpdateTaskDto) {
-        const updatedTask = await this.taskModel.findByIdAndUpdate(id, updateTaskDto, { new: true });
-        return updatedTask;
+
     }
 
     async deleteTask(id: string) {

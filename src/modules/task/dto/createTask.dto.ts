@@ -13,13 +13,16 @@ export class CreateTaskDto {
     @IsEnum(TaskCategory)
     category: TaskCategory;
 
-    @IsOptional()
     @IsDateString()
-    startDate?: string;
+    startDate: Date;
 
     @IsOptional()
     @IsDateString()
-    endDate?: string;
+    endDate?: Date;
+
+    @IsOptional()
+    @IsDateString()
+    creationDate?: Date;
 
     /*@IsOptional()
     @IsString()
