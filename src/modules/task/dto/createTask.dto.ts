@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, IsDateString, IsNumber, IsEnum } from 'class-validator';
 import {TaskCategory} from "../../../schemas/enums/task.category";
 import {TaskPriority} from "../../../schemas/enums/task.prioirity";
+import {TaskStatus} from "../../../schemas/enums/task.status";
 
 
 
@@ -9,7 +10,7 @@ export class CreateTaskDto {
     @IsString()
     name: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsEnum(TaskCategory)
     category: TaskCategory;
 
@@ -35,4 +36,6 @@ export class CreateTaskDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+
 }
