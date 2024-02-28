@@ -2,24 +2,44 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Task } from 'src/schemas/task.schema';
-import { CreateTaskDto } from './dto/createTask.dto';
+import {CreateTaskDto, StatusOfTaskDTO} from './dto/createTask.dto';
 import { UpdateTaskDto } from './dto/updateTask.dto';
 import {BaseService} from "../../global-utils/base.service";
+import {TaskStatus} from "../../schemas/enums/task.status";
+import {StatusOfTask} from "../../schemas/status.schema";
 
 @Injectable()
 export class TaskService extends BaseService<Task> {
     constructor(
         @InjectModel(Task.name) private taskModel: Model<Task>,
+        @InjectModel(StatusOfTask.name) private statusOfTaskModel: Model<StatusOfTask>,
+
     ) {
         super(taskModel);
     }
 
     async createTask(createTaskDto: CreateTaskDto) {
-        return super.create(createTaskDto)
+
+        const newStatusTask = new this.statusOfTaskModel({
+            status: TaskStatus.TODO,
+        });
+
+        const savedStatusTask = await newStatusTask.save();
+
+        const newTask = new this.taskModel({
+            ...createTaskDto,
+            status: [savedStatusTask],
+        });
+
+        return newTask.save();
     }
 
-    getAllTasks() {
-        return this.taskModel.find().exec();
+
+
+
+    async getAllTasks() {
+        const tasks = await this.taskModel.find().populate('status').exec();
+        return tasks;
     }
 
     async getOneTask(id: string) {
