@@ -8,4 +8,5 @@ export class UpdateTeamDto {
     @IsOptional()
     @IsString()
     description?: string;
+
 }

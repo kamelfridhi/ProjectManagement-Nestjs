@@ -26,18 +26,19 @@ export class TeamService extends BaseService<Team> {
 
     getAllTeams() {
         return super.findAll();
-    }
 
-    getOneTeam(id: string) {
-        return super.findOne(id);
-    }
-
-    updateTeam(id: string, updateTeamDto: UpdateTeamDto) {
-        return super.update(id,updateTeamDto);
-    }
-
-    deleteTeam(id: string) {
-        return super.remove(id);
-    }
-
-}
+     }
+ 
+     getOneTeam(id: string) {
+         return super.findOne(id);
+     }
+ 
+     updateTeam(id: string, updateTeamDto: UpdateTeamDto) {
+         return super.update(id,updateTeamDto);
+     }
+ 
+     deleteTeam(id: string) {
+         return super.remove(id);
+     }
+ 
+ }
