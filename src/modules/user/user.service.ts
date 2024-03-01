@@ -52,7 +52,7 @@ export class UserService extends BaseService<User>{
             throw new NotFoundException('Incorrect password');
         }
 
-        const { password: _, username, ...user } = findedUser;
+        const { password: _, username,role,teams,settings,age, ...user } = findedUser;
 
         return this.jwtService.sign(user);
 
