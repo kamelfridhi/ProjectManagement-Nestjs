@@ -12,18 +12,11 @@ export class User{
     @Prop({ required: true,unique: true })
     email: string;
 
-    
     @Prop({ required: true })
     password: string;
 
     @Prop({ required: false })
     age: number;
-
-    @Prop({required:false})
-    avatarUrl?: string;
-
-    @Prop({required:false})
-    displayName?: string;
 
     @Prop({type:mongoose.Schema.Types.ObjectId,ref:'UserSettings'})
     settings: UserSettings;
@@ -33,7 +26,8 @@ export class User{
 
     @Prop({ type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
     teams: Team[];
-
+    
+    
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
