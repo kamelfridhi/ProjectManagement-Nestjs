@@ -2,29 +2,20 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUserDto';
-import { AuthDto } from './dto/Auth.dto';
-
 
 @Controller('user')
 export class UserController {
-    constructor(private readonly usersService: UserService) { }
+    constructor(
+        private readonly usersService: UserService,
 
-    @Post()
-    //@UsePipes(new ValidationPipe())
-    createUser(@Body() createdUserDto: CreateUserDto) {
-        return this.usersService.createUser(createdUserDto);
+    ) {
+
     }
 
-    @Post('login')
-    //@UseGuards(LocalAuthGuard)
-    login(@Body() loginAuthDto: AuthDto) {
-        console.log(loginAuthDto);
-        return this.usersService.login(loginAuthDto);
-    }
 
     @Get()
     getAllUsers() {
@@ -57,4 +48,4 @@ export class UserController {
 
 
 
- }
+}
