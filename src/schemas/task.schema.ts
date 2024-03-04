@@ -4,6 +4,8 @@ import {TaskPriority} from "./enums/task.prioirity";
 import mongoose from "mongoose";
 import { Board } from "./board.schema";
 import { StatusOfTask } from "./status.schema";
+import { UserSettings } from "./userSettings.schema";
+import { User } from "./user.schema";
 
 @Schema()
 export class Task{
@@ -35,6 +37,8 @@ export class Task{
     @Prop({ type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'StatusOfTask' }] })
     status: StatusOfTask[];
 
+    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'User'})
+    assignedTo: mongoose.Types.ObjectId; // Store only the ObjectId of the user
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
