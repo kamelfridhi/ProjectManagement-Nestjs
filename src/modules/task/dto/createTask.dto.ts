@@ -45,6 +45,10 @@ export class StatusOfTaskDTO {
         assignPerson?: string;*/
 
         @IsOptional()
+        @IsString()
+        projectId?: "8";
+
+        @IsOptional()
         @IsEnum(TaskPriority)
         priority?: TaskPriority;
 

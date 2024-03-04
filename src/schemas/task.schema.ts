@@ -32,8 +32,10 @@ export class Task{
     @Prop({type:mongoose.Schema.Types.ObjectId,ref:'Board'})
     board: Board;
 
+    // bech twali string id ekhir status
     @Prop({ type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'StatusOfTask' }] })
     status: StatusOfTask[];
+
 
 }
 

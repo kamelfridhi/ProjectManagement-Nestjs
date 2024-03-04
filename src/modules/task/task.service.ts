@@ -20,18 +20,17 @@ export class TaskService extends BaseService<Task> {
 
     async createTask(createTaskDto: CreateTaskDto) {
 
-        const newStatusTask = new this.statusOfTaskModel({
-            status: TaskStatus.TODO,
-        });
+        const newStatusTask = await this.statusOfTaskModel.findOne({status : TaskStatus.TODO}).exec()
+        if (newStatusTask) {
+            const newTask = new this.taskModel({
+                ...createTaskDto,
+                status: [newStatusTask],
+            });
 
-        const savedStatusTask = await newStatusTask.save();
+            return await newTask.save();
+        }
 
-        const newTask = new this.taskModel({
-            ...createTaskDto,
-            status: [savedStatusTask],
-        });
 
-        return newTask.save();
     }
 
 
@@ -62,4 +61,54 @@ export class TaskService extends BaseService<Task> {
             throw new NotFoundException('Task not found');
         }
     }
+
+    async changeStatus(taskId: string, newStatusId: string) {
+        // Récupérer la tâche correspondant à l'ID donné
+        const task = await this.taskModel.findById(taskId);
+
+        if (!task) {
+            throw new NotFoundException('Task not found');
+        }
+
+        // Récupérer le statut correspondant à l'ID donné
+        const newStatus = await this.statusOfTaskModel.findById(newStatusId);
+
+        if (!newStatus) {
+            throw new NotFoundException('Status not found');
+        }
+
+
+
+        // Mettre à jour le statut de la tâche avec le nouveau statut
+        task.status.push(newStatus);
+
+        // Enregistrer la tâche mise à jour avec le nouveau statut
+        return task.save();
+    }
+
+    async changeStatusByName(taskId: string, newStatusName: string) {
+        // Récupérer la tâche correspondant à l'ID donné
+        const task = await this.taskModel.findById(taskId);
+
+        if (!task) {
+            throw new NotFoundException('Task not found');
+        }
+
+        // Récupérer le statut correspondant à l'ID donné
+        const newStatus = await this.statusOfTaskModel.findOne({status : newStatusName});
+
+        if (!newStatus) {
+            throw new NotFoundException('Status not found');
+        }
+
+
+
+        // Mettre à jour le statut de la tâche avec le nouveau statut
+        task.status.push(newStatus);
+
+        // Enregistrer la tâche mise à jour avec le nouveau statut
+        return task.save();
+    }
+
+
 }
