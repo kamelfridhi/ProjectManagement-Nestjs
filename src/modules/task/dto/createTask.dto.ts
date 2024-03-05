@@ -40,9 +40,9 @@ export class StatusOfTaskDTO {
         @IsDateString()
         creationDate?: Date;
 
-        /*@IsOptional()
+        @IsOptional()
         @IsString()
-        assignPerson?: string;*/
+        assignPerson?: string;
 
         @IsOptional()
         @IsString()

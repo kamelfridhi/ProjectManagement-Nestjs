@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {StatusModule} from "./modules/status/status.module";
 
 
+
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://127.0.0.1/project-managment'),
@@ -14,7 +15,10 @@ import {StatusModule} from "./modules/status/status.module";
     TeamModule,
     TaskModule,
       StatusModule,
-    ProjectModule],
+    ProjectModule,
+    ],
+
+
   controllers: [],
   providers: [],
 })

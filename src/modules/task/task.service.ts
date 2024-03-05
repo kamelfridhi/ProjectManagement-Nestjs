@@ -7,25 +7,31 @@ import { UpdateTaskDto } from './dto/updateTask.dto';
 import {BaseService} from "../../global-utils/base.service";
 import {TaskStatus} from "../../schemas/enums/task.status";
 import {StatusOfTask} from "../../schemas/status.schema";
+import {User} from "../../schemas/user.schema";
 
 @Injectable()
 export class TaskService extends BaseService<Task> {
     constructor(
         @InjectModel(Task.name) private taskModel: Model<Task>,
         @InjectModel(StatusOfTask.name) private statusOfTaskModel: Model<StatusOfTask>,
+        @InjectModel(User.name) private userModel: Model<User>,
 
     ) {
         super(taskModel);
     }
 
-    async createTask(createTaskDto: CreateTaskDto) {
+    async createTask({assignPerson,...createTaskDto}: CreateTaskDto) {
 
         const newStatusTask = await this.statusOfTaskModel.findOne({status : TaskStatus.TODO}).exec()
         if (newStatusTask) {
+
+            const assigneUser= await this.userModel.findById(assignPerson).exec();
             const newTask = new this.taskModel({
                 ...createTaskDto,
+                assignPerson: assigneUser._id,
                 status: [newStatusTask],
             });
+
 
             return await newTask.save();
         }
@@ -109,6 +115,7 @@ export class TaskService extends BaseService<Task> {
         // Enregistrer la tâche mise à jour avec le nouveau statut
         return task.save();
     }
+
 
 
 }
