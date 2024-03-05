@@ -46,20 +46,24 @@ export class AuthController {
         const findedUser = await this.userModel.findOne({ email }).lean().exec()
 
         if (!findedUser) {
-            throw new NotFoundException('Incorrect email or password');
+            throw new NotFoundException('Incorrect email');
         }
 
         const passwordMatch = await bcrypt.compare(password, findedUser.password);
         if (!passwordMatch) {
-            throw new NotFoundException('Incorrect email or password');
+            throw new NotFoundException('Incorrect password');
         }
-
+        
         const jwt = await this.jwtService.signAsync({ id: findedUser._id });
-
+        const { password: _, ...result } = findedUser;
         // Set the JWT token as an HTTP-only cookie
         res.cookie('jwt', jwt, { httpOnly: true });
 
-        return { message: 'success' };
+        return {
+            message: 'success',
+            data: result,
+            status: 200
+        };
     }
 
     @Get('user')

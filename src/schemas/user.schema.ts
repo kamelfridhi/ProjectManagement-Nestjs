@@ -5,29 +5,38 @@ import { Role } from "./roles.schema";
 import { Team } from "./team.schema";
 
 @Schema()
-export class User{
-    @Prop({ required: false })
+export class User {
+    @Prop()
     username: string;
 
-    @Prop({ required: true,unique: true })
+    @Prop()
+    firstName: string;
+
+    @Prop()
+    lastName: string;
+
+    @Prop({ required: true, unique: true })
     email: string;
 
     @Prop({ required: true })
     password: string;
 
-    @Prop({ required: false })
-    age: number;
+    @Prop()
+    dateOfBirth: Date;
 
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'UserSettings'})
+    @Prop()
+    address: string;
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'UserSettings' })
     settings: UserSettings;
 
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'Role'})
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role' })
     role: Role;
 
-    @Prop({ type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
     teams: Team[];
-    
-    
+
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
