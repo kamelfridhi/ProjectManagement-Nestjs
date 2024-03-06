@@ -5,9 +5,9 @@ import { TaskStatus } from "./enums/task.status";
 @Schema()
 export class StatusOfTask{
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     status: TaskStatus;
-    
+
 }
 
 export const StatusOfTaskSchema = SchemaFactory.createForClass(StatusOfTask);

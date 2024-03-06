@@ -11,13 +11,13 @@ export class Task{
     @Prop({ required: true })
     name: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     category: TaskCategory;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     description: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     priority: TaskPriority;
 
     @Prop({ default: Date.now })

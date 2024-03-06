@@ -1,38 +1,59 @@
-import { IsNotEmpty, IsOptional, IsString, IsDateString, IsNumber, IsEnum } from 'class-validator';
-import {TaskCategory} from "../../../schemas/enums/task.category";
-import {TaskPriority} from "../../../schemas/enums/task.prioirity";
+    import {
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    IsDateString,
+    IsNumber,
+    IsEnum,
+    IsArray,
+        ValidateNested
+    } from 'class-validator';
+    import {TaskCategory} from "../../../schemas/enums/task.category";
+    import {TaskPriority} from "../../../schemas/enums/task.prioirity";
+    import {TaskStatus} from "../../../schemas/enums/task.status";
+    import {StatusOfTask} from "../../../schemas/status.schema";
+    import {Type} from "class-transformer";
 
-
-
-export class CreateTaskDto {
+export class StatusOfTaskDTO {
     @IsNotEmpty()
-    @IsString()
-    name: string;
-
-    @IsNotEmpty()
-    @IsEnum(TaskCategory)
-    category: TaskCategory;
-
-    @IsDateString()
-    startDate: Date;
-
-    @IsOptional()
-    @IsDateString()
-    endDate?: Date;
-
-    @IsOptional()
-    @IsDateString()
-    creationDate?: Date;
-
-    /*@IsOptional()
-    @IsString()
-    assignPerson?: string;*/
-
-    @IsOptional()
-    @IsEnum(TaskPriority)
-    priority?: TaskPriority;
-
-    @IsOptional()
-    @IsString()
-    description?: string;
+    @IsEnum(TaskStatus)
+    statustask: TaskStatus;
 }
+
+    export class CreateTaskDto {
+        @IsNotEmpty()
+        @IsString()
+        name: string;
+
+        @IsOptional()
+        @IsEnum(TaskCategory)
+        category: TaskCategory;
+
+        @IsDateString()
+        startDate: Date;
+
+        @IsOptional()
+        @IsDateString()
+        endDate?: Date;
+
+        @IsOptional()
+        @IsDateString()
+        creationDate?: Date;
+
+        /*@IsOptional()
+        @IsString()
+        assignPerson?: string;*/
+
+        @IsOptional()
+        @IsEnum(TaskPriority)
+        priority?: TaskPriority;
+
+        @IsOptional()
+        @IsString()
+        description?: string;
+
+
+        @ValidateNested()
+        @Type(()=>StatusOfTaskDTO)
+        status: StatusOfTaskDTO[];
+    }
