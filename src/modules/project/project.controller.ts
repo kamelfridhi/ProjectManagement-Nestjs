@@ -20,9 +20,10 @@ export class projectController{
         return this.projectService.getProjectByName(projectName);
     }
     @Patch(':projectName')
-    updateProject(@Param('projectName')projectName: string, @Body() updateProjectDto:updateProjectDto){
-        return this.projectService.updateProject(projectName,updateProjectDto)
+    updateProject(@Param('projectName') projectName: string, @Body() updateProjectDto: updateProjectDto) {
+        return this.projectService.updateProject(projectName, updateProjectDto);
     }
+
 
     @Delete(':projectName')
     deleteProject(@Param('projectName') projectName:string){
