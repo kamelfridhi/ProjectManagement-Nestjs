@@ -3,36 +3,44 @@ import mongoose from "mongoose";
 import { UserSettings } from "./userSettings.schema";
 import { Role } from "./roles.schema";
 import { Team } from "./team.schema";
+import { Task } from "./task.schema";
 
 @Schema()
-export class User{
-    @Prop({ required: false })
+export class User {
+    @Prop()
     username: string;
 
-    @Prop({ required: true,unique: true })
+    @Prop()
+    firstName: string;
+
+    @Prop()
+    lastName: string;
+
+    @Prop({ required: true, unique: true })
     email: string;
 
-    
     @Prop({ required: true })
     password: string;
 
-    @Prop({ required: false })
-    age: number;
+    @Prop()
+    dateOfBirth: Date;
 
-    @Prop({required:false})
-    avatarUrl?: string;
+    @Prop()
+    address: string;
 
-    @Prop({required:false})
-    displayName?: string;
+    @Prop()
+    telephone: string;
 
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'UserSettings'})
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'UserSettings' })
     settings: UserSettings;
 
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'Role'})
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role' })
     role: Role;
 
-    @Prop({ type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
+ 
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
     teams: Team[];
+ 
 
 }
 

@@ -1,6 +1,8 @@
 import { IsOptional, IsString, IsDateString, IsEnum } from 'class-validator';
 import {TaskPriority} from "../../../schemas/enums/task.prioirity";
 import {TaskCategory} from "../../../schemas/enums/task.category";
+import {Type} from "class-transformer";
+import {StatusOfTaskDTO} from "./createTask.dto";
 
 
 export class UpdateTaskDto {
@@ -27,4 +29,6 @@ export class UpdateTaskDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+
 }
