@@ -5,9 +5,7 @@ export class UpdateTeamDto {
     @IsString()
     name?: string;
 
-    @IsOptional()
-    @IsString()
-    description?: string;
+  
 
    @IsOptional()
   @IsString()
