@@ -3,7 +3,7 @@ import { TaskCategory } from "../../../schemas/enums/task.category";
 import { TeamCategory } from "../../../schemas/enums/team.category";
 
 export class CreateTeamDto{
-@IsNotEmpty()
+ @IsNotEmpty()
 @IsString()
   name:string;
 
@@ -16,4 +16,5 @@ export class CreateTeamDto{
   @IsNotEmpty()
   @IsEnum(TeamCategory)
   category: TeamCategory;
+ 
 }

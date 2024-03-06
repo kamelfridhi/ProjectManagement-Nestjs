@@ -36,6 +36,7 @@ export class TeamService extends BaseService<Team> {
 
     getAllTeams() {
         return super.findAll();
+
      }
 
      getOneTeam(id: string) {

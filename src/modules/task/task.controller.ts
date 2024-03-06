@@ -37,4 +37,24 @@ export class TaskController {
         if (!deletedTask) throw new HttpException('Task not found', 404);
         return deletedTask;
     }
+
+    @Patch(':taskId/:statusId')
+    async changeTaskStatus(@Param('taskId') taskId: string, @Param('statusId') statusId: string) {
+        try {
+            const updatedTask = await this.taskService.changeStatus(taskId, statusId);
+            return updatedTask;
+        } catch (error) {
+            throw new HttpException(error.message, 400);
+        }
+    }
+
+    @Patch('changeTaskStatusByName/:taskId/:statusName')
+    async changeTaskStatusByName(@Param('taskId') taskId: string, @Param('statusName') statusName: string) {
+        try {
+            const updatedTask = await this.taskService.changeStatusByName(taskId, statusName);
+            return updatedTask;
+        } catch (error) {
+            throw new HttpException(error.message, 400);
+        }
+    }
 }

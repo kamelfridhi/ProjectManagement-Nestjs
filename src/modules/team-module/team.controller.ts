@@ -12,7 +12,7 @@ import { AssignTaskDto } from "./dto/assignTask.dto";
 
 @Controller('team')
 export class TeamController {
-
+ 
   constructor(private readonly teamService: TeamService) { }
 
   @Post()
@@ -56,8 +56,7 @@ export class TeamController {
     const updatedTeam = await this.teamService.affectteamtoproject(teamId, projectId);
     if (!updatedTeam) throw new HttpException('Team not found', 404);
     return updatedTeam;
-  }
-
+  } 
   @Patch(':taskId/affecttask/:userId')
   async assignTaskToMember(@Param('taskId') taskId: string, @Param('userId') userId: string): Promise<void> {
      await this.teamService.assignTaskToMember(taskId, userId);
