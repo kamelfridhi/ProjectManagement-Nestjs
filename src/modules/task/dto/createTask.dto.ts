@@ -40,9 +40,13 @@ export class StatusOfTaskDTO {
         @IsDateString()
         creationDate?: Date;
 
-        /*@IsOptional()
+        @IsOptional()
         @IsString()
-        assignPerson?: string;*/
+        assignPerson?: string;
+
+        @IsOptional()
+        @IsString()
+        projectId?: "8";
 
         @IsOptional()
         @IsEnum(TaskPriority)
