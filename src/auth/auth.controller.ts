@@ -39,11 +39,12 @@ export class AuthController {
         return newUser.save();
     }
 
+
     @Post('login')
     async login(@Body() loginAuthDto: AuthDto, @Res({ passthrough: true }) res: Response) {
         const { email, password } = loginAuthDto;
 
-        const findedUser = await this.userModel.findOne({ email }).lean().exec()
+        const findedUser = await this.userModel.findOne({ email }).populate('role settings').lean().exec();
 
         if (!findedUser) {
             throw new NotFoundException('Incorrect email');
@@ -53,7 +54,7 @@ export class AuthController {
         if (!passwordMatch) {
             throw new NotFoundException('Incorrect password');
         }
-        
+
         const jwt = await this.jwtService.signAsync({ id: findedUser._id });
         const { password: _, ...result } = findedUser;
         // Set the JWT token as an HTTP-only cookie

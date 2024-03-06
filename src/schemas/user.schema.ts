@@ -27,6 +27,9 @@ export class User {
     @Prop()
     address: string;
 
+    @Prop()
+    telephone: string;
+
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'UserSettings' })
     settings: UserSettings;
 
