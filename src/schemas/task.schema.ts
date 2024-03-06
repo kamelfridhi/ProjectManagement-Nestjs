@@ -4,7 +4,9 @@ import {TaskPriority} from "./enums/task.prioirity";
 import mongoose, {Types} from "mongoose";
 import { Board } from "./board.schema";
 import { StatusOfTask } from "./status.schema";
-import {User} from "./user.schema";
+ import { UserSettings } from "./userSettings.schema";
+import { User } from "./user.schema";
+ 
 
 @Schema()
 export class Task{
@@ -36,6 +38,7 @@ export class Task{
     // bech twali string id ekhir status
     @Prop({ type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'StatusOfTask' }] })
     status: StatusOfTask[];
+
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     assignPerson: User;
