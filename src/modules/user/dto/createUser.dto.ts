@@ -31,11 +31,13 @@ export class CreateUserDto {
 
     @IsNotEmpty()
     password: string;
-
-
-
+    
     @IsOptional()
     @ValidateNested()
     @Type(() => SettingsDto)
     settings?: SettingsDto;
+
+    @IsNotEmpty()
+    @IsString() 
+    role: string;
 }
