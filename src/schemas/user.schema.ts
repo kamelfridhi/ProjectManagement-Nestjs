@@ -31,16 +31,22 @@ export class User {
     @Prop()
     telephone: string;
 
+    @Prop()
+    tryLogin: number;
+
+    @Prop()
+    photo: string;
+
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'UserSettings' })
     settings: UserSettings;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role' })
     role: Role;
 
- 
+
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
     teams: Team[];
- 
+
 
 }
 
