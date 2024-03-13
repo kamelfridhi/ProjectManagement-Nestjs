@@ -11,11 +11,6 @@ export class UserSettings{
     @Prop({ default: false })
     blocked: boolean;
 
-    @Prop({ default: Date.now })
-    createdAt: Date;
-
-    @Prop({ default: Date.now })
-    updatedAt: Date;
 
     
 }

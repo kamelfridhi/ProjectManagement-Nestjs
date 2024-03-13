@@ -31,11 +31,26 @@ export class User {
     @Prop()
     telephone: string;
 
-    @Prop()
+    @Prop({default:0})
     tryLogin: number;
 
-    @Prop()
+    @Prop({default:"user.png"})
     photo: string;
+
+    @Prop({ default: Date.now })
+    createdAt: Date;
+
+    @Prop()
+    blockedExpires: Date;
+
+    @Prop()
+    passwordChangedAt: Date;
+
+    @Prop()
+    passwordResetToken: string;
+
+    @Prop()
+    passwordResetExpires: Date;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'UserSettings' })
     settings: UserSettings;

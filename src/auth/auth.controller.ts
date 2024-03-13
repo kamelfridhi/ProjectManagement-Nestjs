@@ -66,7 +66,7 @@ export class AuthController {
             status: 200
         };
     }
-
+/*
     @Get('user')
     async loggedInUser(@Req() req: Request) {
         try {
@@ -82,7 +82,7 @@ export class AuthController {
             throw new UnauthorizedException();
         }
     }
-
+*/
     @Post('logout')
     async logout(@Res({ passthrough: true }) res: Response) {
         // Clear the JWT cookie to log out the user

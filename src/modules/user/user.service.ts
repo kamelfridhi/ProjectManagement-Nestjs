@@ -23,14 +23,28 @@ export class UserService extends BaseService<User>{
         super(userModel);
     }
 
-
+  async  updateImgProp(id: string,filename:string) {
+    return await  this.userModel.findOneAndUpdate({_id:id}, {photo: filename}, {new: true});
+  }
     getAllUsers() {
        return super.findAll();
     }
 
-    getOneUser(id: string) {
-        return super.findOne(id, ['settings', 'role', 'teams']);
+  async  getOneUser(id: string) {
+        const user = await super.findOne(id, ['settings', 'role', 'teams']);
+        const {password,...result} = user;
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        return {
+            message: 'success',
+            data: result,
+            status: 200
+        };
+
+
     }
+
 
     updateUser(id: string, updateUserDto: UpdateUserDto) {
         return super.update(id, updateUserDto);
