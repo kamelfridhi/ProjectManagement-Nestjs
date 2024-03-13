@@ -3,18 +3,46 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  InternalServerErrorException,
+  Param,
+  Patch,
+  Post
+} from "@nestjs/common";
 
 import { TeamService } from "./team.service";
 import { CreateTeamDto } from "./dto/createTeam.dto";
 import { UpdateTeamDto } from "./dto/updateTeam.dto";
 import { AssignTaskDto } from "./dto/assignTask.dto";
+import {TeamCategoryEnum} from "../../schemas/enums/team.category.enum";
+import {User} from "../../schemas/user.schema";
+import {UserRoles} from "../../schemas/enums/user.roles";
 
 @Controller('team')
 export class TeamController {
  
   constructor(private readonly teamService: TeamService) { }
-
+  @Get('all/:teamId/:role')
+  async getUsersNotInTeam(
+      @Param('teamId') teamId: string,
+      @Param('role') role: string,
+  ): Promise<User[]> {
+    try {
+      const users = await this.teamService.getUsersNotInTeam(teamId,  role);
+      return users;
+    } catch (error) {
+      throw new Error(`Error fetching users: ${error.message}`);
+    }
+  }
+  @Get('categories')
+  getCategories(): string[] {
+    return Object.values(TeamCategoryEnum);
+  }
   @Post()
   createTeam(@Body() createTeamDto: CreateTeamDto) {
     return this.teamService.createTeam(createTeamDto);
@@ -82,4 +110,27 @@ export class TeamController {
       return { success: false, message: error.message };
     }
   }
+
+  @Post(':teamId/members2/:userId')
+  async addMemberToTeam2(@Param('teamId') teamId: string, @Param('userId') userId: string) {
+     await this.teamService.addMemberToTeam2(teamId, userId);
+
+  }
+  @Get('notif/:userId')
+  async displayNotifications(@Param('userId') userId: string) {
+   return   await this.teamService.displayNotifications(userId);
+  }
+  @Post('/accept-invitation/:userId/:notificationId')
+  async acceptTeamInvitation(
+      @Param('userId') userId: string,
+      @Param('notificationId') notificationId: string
+  ) {
+    try {
+      await this.teamService.acceptTeamInvitation(userId, notificationId);
+      return { message: 'Team invitation accepted successfully' };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
 }

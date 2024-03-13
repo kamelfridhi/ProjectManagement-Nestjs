@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { UserSettings } from "./userSettings.schema";
 import { Role } from "./roles.schema";
 import { Team } from "./team.schema";
+import { Notification } from "./notification.schema";
 import { Task } from "./task.schema";
 
 @Schema()
@@ -40,7 +41,10 @@ export class User {
  
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
     teams: Team[];
- 
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'notifications'}] })
+    notifications: Notification[]; // Array to store notifications for the user
+
 
 }
 

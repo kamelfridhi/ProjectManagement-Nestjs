@@ -2,17 +2,18 @@
 https://docs.nestjs.com/providers#services
 */
 
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { BaseService } from 'src/global-utils/base.service';
-import { Team } from 'src/schemas/team.schema';
-import { CreateTeamDto } from "./dto/createTeam.dto";
-import { UpdateTaskDto } from "../task/dto/updateTask.dto";
-import { UpdateTeamDto } from "./dto/updateTeam.dto";
-import { User } from "../../schemas/user.schema";
-import { Project } from "../../schemas/project.schema";
-import { Task } from 'src/schemas/task.schema';
+import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import {InjectModel} from '@nestjs/mongoose';
+import {Model} from 'mongoose';
+import {BaseService} from 'src/global-utils/base.service';
+import {Team} from 'src/schemas/team.schema';
+import {CreateTeamDto} from "./dto/createTeam.dto";
+import {UpdateTeamDto} from "./dto/updateTeam.dto";
+import {User} from "../../schemas/user.schema";
+import {Project} from "../../schemas/project.schema";
+import {Task} from 'src/schemas/task.schema';
+import {NotificationService} from "../notification/notification.service";
+import {Notification} from "../../schemas/notification.schema";
 
 @Injectable()
 export class TeamService extends BaseService<Team> {
@@ -24,8 +25,10 @@ export class TeamService extends BaseService<Team> {
 
         @InjectModel(Team.name) private TeamModel: Model<Team>,
         @InjectModel(User.name) private UserModel: Model<User>,
+        @InjectModel(Notification.name) private notificationModel: Model<Notification>,
         @InjectModel(Project.name) private ProjectModel: Model<Project>,
         @InjectModel(Task.name) private readonly taskModel: Model<Task>,
+        private readonly notificationService: NotificationService,
 
     ) {
         super(TeamModel);
@@ -46,33 +49,34 @@ export class TeamService extends BaseService<Team> {
      updateTeam(id: string, updateTeamDto: UpdateTeamDto) {
          return super.update(id,updateTeamDto);
      }
- 
-     async deleteTeam(id: string) {
-       try {
-         // Find the team to delete
-         const team = await this.TeamModel.findById(id);
-         if (!team) {
-           throw new NotFoundException('Team not found');
-         }
 
-         // Find all users belonging to the team
-         const users = await this.UserModel.find({ 'teams': id });
-         if (users.length > 0) {
-           // Remove the team reference from each user
-           await Promise.all(users.map(async (user) => {
-             user.teams = null;
-             await user.save();
-           }));
-         }
+  async deleteTeam(id: string) {
+    try {
+      // Find the team to delete
+      const team = await this.TeamModel.findById(id);
+      if (!team) {
+        throw new NotFoundException('Team not found');
+      }
 
-         // Delete the team
-         await super.remove(id);
+      // Find all users belonging to the team
+      const users = await this.UserModel.find({ 'teams': id });
+      if (users.length > 0) {
+        // Remove the team reference from each user
+        await Promise.all(users.map(async (user) => {
+          user.teams = user.teams.filter(teamId => teamId.toString() !== id);
+          await user.save();
+        }));
+      }
 
-         return { success: true };
-       } catch (error) {
-         throw new Error(error.message);
-       }
-     }
+      // Delete the team
+      await super.remove(id);
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async addMemberToTeam(teamId: string, userId: string): Promise<Team | null> {
     try {
       const team = await this.TeamModel.findById(teamId);
@@ -81,11 +85,20 @@ export class TeamService extends BaseService<Team> {
       }
 
       // Update the user document
-      const user = await this.UserModel.findByIdAndUpdate(userId,{teams:team});
+      const user = await this.UserModel.findById(userId);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
 
+      // Ensure that team.users and user.teams are arrays
+      team.users = team.users || [];
+      user.teams = user.teams || [];
+
+      // Update the user's teams and save
+      user.teams.push(team);
       await user.save();
 
-      // Update the team document
+      // Update the team's users and save
       team.users.push(user);
       await team.save();
 
@@ -94,6 +107,7 @@ export class TeamService extends BaseService<Team> {
       throw new Error(error.message);
     }
   }
+
 
   async affectteamtoproject(teamId: string, projectId: string) {
     try {
@@ -164,23 +178,123 @@ export class TeamService extends BaseService<Team> {
         throw new NotFoundException('User not found');
       }
 
-      // Check if the user is a member of the team
-      if (!user.teams || user.teams.toString() !== teamId) {
-        throw new ConflictException('User is not a member of the specified team');
-      }
+      // Remove the team from all teams the user belongs to
+      user.teams = user.teams.filter(userTeamId => userTeamId.toString() !== teamId);
 
-      // Remove the user from the team's users array
-      team.users = team.users.filter(user => user.toString() !== userId);
-      await team.save();
+      // Remove the user from all teams they are a member of
+      team.users = team.users.filter(teamUserId => teamUserId.toString() !== userId);
 
-      // Remove the team reference from the user
-      user.teams = null;
+      // Save the updated user and team documents
       await user.save();
+      await team.save();
 
       return { success: true };
     } catch (error) {
       throw new Error(error.message);
     }
   }
+
+  async getUsersNotInTeam(teamId: string, roleName: string): Promise<User[]> {
+    try {
+      // Find the team by ID
+      const team = await this.TeamModel.findById(teamId).exec();
+      if (!team) {
+        throw new Error('Team not found');
+      }
+
+      // Find users who are not in the team and have the specified role
+      const users = await this.UserModel.find({
+        teams: { $ne: teamId },
+      }).populate('role').exec();
+      console.log("tgerzeareazeraz"+users);
+      // Filter users based on the specified role and number of teams
+      const usersWithRoleAndFewerTeams = users.filter(user =>
+           user.role.role === roleName && (!user.teams || user.teams.length < 3)
+      );
+      console.log("azeazeazeazeae"+usersWithRoleAndFewerTeams);
+      return usersWithRoleAndFewerTeams;
+    } catch (error) {
+      throw new Error(`Error fetching users: ${error.message}`);
+    }
+  }
+
+
+
+
+  async addMemberToTeam2(teamId: string, userId: string) {
+    try {
+      const team = await this.TeamModel.findById(teamId);
+      if (!team) {
+        throw new NotFoundException('Team not found');
+      }
+
+      // Update the user document
+      const user = await this.UserModel.findById(userId);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Ensure that team.users and user.teams are arrays
+      team.users = team.users || [];
+      user.teams = user.teams || [];
+
+      // Send a notification to the user
+      await this.notificationService.sendTeamInvitationNotification(team, userId); // Pass the team and user ID
+
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async displayNotifications(userId: string): Promise<Notification[]> {
+    try {
+      // Find the user by ID and populate the 'notifications' field
+      const user = await this.UserModel.findById(userId).populate('notifications').exec();
+      console.log("eazeaze"+user);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return user.notifications;
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      throw new Error(`Error fetching notifications: ${error.message}`);
+    }
+  }
+  async acceptTeamInvitation(userId: string, notificationId: string): Promise<void> {
+    try {
+      // Find the user by ID
+      const user = await this.UserModel.findById(userId);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Find the notification by ID
+      const notification = await this.notificationModel.findById(notificationId);
+      if (!notification) {
+        throw new NotFoundException('Notification not found');
+      }
+
+      // Get the team ID from the pending field of the notification
+      const teamId = notification.pending.toString();
+
+      // Remove the notification from the user's pending notifications
+      user.notifications = user.notifications.filter(notif => notif.toString() !== notificationId);
+      await user.save();
+
+      // Add the user to the team
+      const team = await this.addMemberToTeam(teamId, userId);
+
+      // Remove the notification from the database
+      await this.notificationModel.deleteOne({ _id: notificationId });
+    } catch (error) {
+      throw new Error(`Error accepting team invitation: ${error.message}`);
+    }
+  }
+
+
+
+
+
 
 }

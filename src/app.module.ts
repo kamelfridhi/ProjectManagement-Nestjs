@@ -6,6 +6,7 @@ import { TaskModule } from './modules/task/task.module';
 import { ProjectModule } from './modules/project/project.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import {StatusModule} from "./modules/status/status.module";
+import {NotificationModule} from "./modules/notification/notification.module";
 
 
 
@@ -18,6 +19,7 @@ import {StatusModule} from "./modules/status/status.module";
     TaskModule,
       StatusModule,
     ProjectModule,
+    NotificationModule,
     ],
 
 
