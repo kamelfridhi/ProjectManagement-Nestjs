@@ -3,6 +3,7 @@ https://docs.nestjs.com/controllers#controllers
 */
 
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -50,10 +51,27 @@ export class UserController {
                     cb(null, filename);
                 },
             }),
+            fileFilter: (req, file, cb) => {
+                // Check if the file type is valid (e.g., jpg, jpeg, png)
+                if (!file.originalname.match(/\.(jpg|jpeg|png|PNG|JPG|JPEG)$/)) {
+                    return cb(new BadRequestException('Only JPG, JPEG, and PNG files are allowed'), false);
+                }
+                cb(null, true);
+            }/*,
+            limits: {
+                fileSize: 1024 * 1024, // 1MB file size limit
+            },
+            */
         }))
         async uploadFile(@UploadedFile() file, @Param('userID') userID: string) {
             // Handle file upload logic here
+            if (!file) {
+                throw new BadRequestException('No file uploaded');
+            }
+
+            // Update user image property in the database
             const user = await this.usersService.updateImgProp(userID, file.filename);
+
             return { filename: file.filename };
         }
 
@@ -106,5 +124,9 @@ export class UserController {
     }
 
 
-
+        @Patch('updateMe/:id')
+        //@UseGuards(AuthGuard) // Assuming you have an AuthGuard to verify user authentication
+        async updateMe(@Body() updateUserDto: UpdateUserDto, @Param('id') id:string ) {
+          return  await this.usersService.updateMe(updateUserDto, id);
+        }
 }

@@ -2,7 +2,7 @@
 https://docs.nestjs.com/providers#services
 */
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BaseService } from 'src/global-utils/base.service';
@@ -53,6 +53,46 @@ export class UserService extends BaseService<User>{
     deleteUser(id: string) {
         return super.remove(id);
     }
+
+  async updateMe(updateUserDto: UpdateUserDto, userId: string) {
+    try {
+      const { password, ...data } = updateUserDto;
+
+      // Fetch the user from the database
+      const user = await this.userModel.findById(userId);
+
+      // Verify if the provided password matches the user's password
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        throw new NotFoundException('Incorrect password');
+      }
+
+      // Update user document
+      const updatedUser = await this.userModel.findOneAndUpdate({ _id: userId }, data, { new: true, runValidators: true });
+
+      // Return success response with updated user data
+      return {
+        status: 'success',
+        data: {
+          user: updatedUser,
+        },
+      };
+    } catch (error) {
+      // If NotFoundException is caught, return the error response with status 404
+      if (error instanceof NotFoundException) {
+        throw new HttpException({
+          status: 'error',
+          message: error.message,
+        }, HttpStatus.NOT_FOUND);
+      }
+
+      // For other errors, return the generic error response
+      throw new HttpException({
+        status: 'error',
+        message: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
 
 
