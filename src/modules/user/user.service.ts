@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/updateUserDto';
 import { UserSettings } from 'src/schemas/userSettings.schema';
 import { Role } from 'src/schemas/roles.schema';
+import { EmailService } from "./mail.service";
 
 @Injectable()
 export class UserService extends BaseService<User>{
@@ -19,6 +20,8 @@ export class UserService extends BaseService<User>{
         @InjectModel(User.name) private userModel: Model<User>,
         @InjectModel(UserSettings.name) private userSettingsModel: Model<UserSettings>,
         @InjectModel(Role.name) private roleModel: Model<Role>,
+        private readonly emailService: EmailService,
+
     ) {
         super(userModel);
     }
@@ -94,6 +97,40 @@ export class UserService extends BaseService<User>{
     }
   }
 
+  async forgotPassword(email: string): Promise<void> {
+
+    const user = await this.userModel.findOne({email});
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const token = this.generateResetToken();
+    user.passwordResetToken = token;
+    user.passwordResetExpires = new Date(Date.now() + 3600000); // 1 hour
+    await user.save();
+
+    const resetLink = `http://localhost:5173/change-password?token=${token}`;
+
+    await this.emailService.sendWelcome(user,'dehe',"el new pass")
+  }
+
+  private generateResetToken(): string {
+    // Generate a random token (you can use libraries like crypto or jwt)
+    return 'randomToken';
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const user = await this.userModel.findOne({passwordResetToken:token});
+    if (!user || user.passwordResetExpires < new Date()) {
+      throw new NotFoundException('Invalid or expired token');
+    }
+
+    user.password = newPassword;
+    user.passwordChangedAt = new Date(); // Update passwordChangedAt field
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+  }
 
 
 }

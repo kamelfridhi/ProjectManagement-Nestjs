@@ -129,4 +129,9 @@ export class UserController {
         async updateMe(@Body() updateUserDto: UpdateUserDto, @Param('id') id:string ) {
           return  await this.usersService.updateMe(updateUserDto, id);
         }
+        @Post('forgotPassword')
+        //@UseGuards(AuthGuard) // Assuming you have an AuthGuard to verify user authentication
+        async forgotPassword(@Body() data:{ email: string }  ) {
+          return  await this.usersService.forgotPassword(data.email);
+        }
 }
