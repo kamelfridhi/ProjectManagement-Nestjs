@@ -20,29 +20,29 @@ export class EmailService {
   }
 
   // Method to send the actual email
-  async send(template: string, subject: string, user: any, url: string, newPassword: string) {
+  async send(template: string, subject: string, user: any, url: string, newPassword: string,fn?:Function) {
     try {
 
 
 // Inside the send method of EmailService
-      /*
-      const html = pug.renderFile(path.join(__dirname, '..', 'views', 'email', `${template}.pug`), {
-        name: user.name,
+
+      const html = pug.renderFile(path.join('src','modules','user','views', `${template}.pug`), {
+        name: user.firstName,
         url: url,
         subject: subject,
-        newPassword: newPassword,
+        fn: fn
       });
 
-       */
+
       // Define email options
       const mailOptions: nodemailer.SendMailOptions = {
         from: {
-          name: "dehe",
+          name: "TeamSphere",
           address: "yassinejalloulitech@gmail.com"
         },
         to: user.email,
         subject: subject,
-        html: "<b>Hello world?</b>", // html: html
+        html: html, // html: html
       };
 
       // Create a transport and send the email
@@ -53,18 +53,9 @@ export class EmailService {
     }
   }
 
-  // Method to send welcome email
-  async sendWelcome(user: any, url: string, newPassword: string) {
-    try {
-      await this.send('welcome', 'Welcome to the Natours family', user, url, newPassword);
-    } catch (error) {
-      console.error('Error sending welcome email:', error);
-      throw new Error('Failed to send welcome email');
-    }
-  }
 
   // Method to send password reset email
-  async sendPasswordReset(user: any, url: string, newPassword: string) {
+  async sendPasswordReset(user: any, url: string, newPassword?: string) {
     try {
       await this.send('passwordReset', 'Your password reset token (valid for only 10 minutes)', user, url, newPassword);
     } catch (error) {

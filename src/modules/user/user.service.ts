@@ -104,28 +104,30 @@ export class UserService extends BaseService<User>{
       throw new NotFoundException('User not found');
     }
 
-    const token = this.generateResetToken();
+    const token = this.generateResetToken(user);
     user.passwordResetToken = token;
-    user.passwordResetExpires = new Date(Date.now() + 3600000); // 1 hour
+    user.passwordResetExpires = new Date(Date.now() + 600000); // 1 min
     await user.save();
 
-    const resetLink = `http://localhost:5173/change-password?token=${token}`;
+    const resetLink = `http://localhost:5173/newPassword?token=${token}`;
 
-    await this.emailService.sendWelcome(user,'dehe',"el new pass")
+    await this.emailService.sendPasswordReset(user,resetLink)
   }
 
-  private generateResetToken(): string {
-    // Generate a random token (you can use libraries like crypto or jwt)
-    return 'randomToken';
+  private generateResetToken(user): string {
+    return `${Date.now()}${user._id}`;
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
     const user = await this.userModel.findOne({passwordResetToken:token});
-    if (!user || user.passwordResetExpires < new Date()) {
+    if (!user || new Date() > user.passwordResetExpires) {
       throw new NotFoundException('Invalid or expired token');
     }
 
-    user.password = newPassword;
+
+    const newHashedPassword = await bcrypt.hash(newPassword, 12);
+
+    user.password = newHashedPassword;
     user.passwordChangedAt = new Date(); // Update passwordChangedAt field
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;

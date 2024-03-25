@@ -11,7 +11,7 @@ import {
     HttpException, Logger,
     Param,
     Patch,
-    Post,
+    Post, Query,
     Res,
     UploadedFile,
     UseInterceptors,
@@ -134,4 +134,9 @@ export class UserController {
         async forgotPassword(@Body() data:{ email: string }  ) {
           return  await this.usersService.forgotPassword(data.email);
         }
+        @Post('resetPassword')
+        async resetPassword(@Query('token') token: string, @Body('password') password: string) {
+            return await this.usersService.resetPassword(token, password);
+        }
+
 }
