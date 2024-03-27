@@ -135,8 +135,8 @@ export class UserController {
           return  await this.usersService.forgotPassword(data.email);
         }
         @Post('resetPassword')
-        async resetPassword(@Query('token') token: string, @Body('password') password: string) {
-            return await this.usersService.resetPassword(token, password);
+        async resetPassword(@Query('token') token: string, @Body('password') password: string, @Body('code') code: string) {
+            return await this.usersService.resetPassword(token, password,code);
         }
 
 }

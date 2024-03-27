@@ -10,6 +10,8 @@ import { UserService } from 'src/modules/user/user.service';
 import { CreateUserDto } from 'src/modules/user/dto/createUser.dto';
 import { UserSettings } from 'src/schemas/userSettings.schema';
 import { Role } from 'src/schemas/roles.schema';
+import { OAuthDto } from "./dto/OAuth.dto";
+import { UserRoles } from "../schemas/enums/user.roles";
 
 @Controller('auth')
 export class AuthController {
@@ -65,6 +67,44 @@ export class AuthController {
             data: result,
             status: 200
         };
+    }
+    @Post('OAuth')
+    async OAouth(@Body() oAuth: OAuthDto, @Res({ passthrough: true }) res: Response) {
+        //const { email, password } = loginAuthDto;
+
+        const findedUser = await this.userModel.findOne({ email:oAuth.email }).populate('role settings').lean().exec();
+
+        if (!findedUser) {
+            const settings = await new this.userSettingsModel().save();
+
+            const roleDocument = await this.roleModel.findOne({ role:UserRoles.user }).exec();
+            if (!roleDocument) {
+                throw new NotFoundException('no role like that');
+            }
+            const password = Math.random().toString(36).slice(-8);
+            const hashedPassword = await bcrypt.hash(password, 12);
+            const newUser = new this.userModel({ password: hashedPassword, settings, role: roleDocument,email:oAuth.email,photo:oAuth.photo, firstName:oAuth.username});
+            await newUser.save();
+            const jwt = await this.jwtService.signAsync({ id: newUser._id });
+            const expire = new Date(Date.now()+3600000);
+            res.cookie('jwt', jwt, { httpOnly: true });
+          return {
+            message: 'success',
+            data: newUser,
+            status: 200
+          };
+        }else {
+            const jwt = await this.jwtService.signAsync({ id: findedUser._id });
+            const { password: _, ...result } = findedUser;
+            // Set the JWT token as an HTTP-only cookie
+            res.cookie('jwt', jwt, { httpOnly: true });
+            return {
+                message: 'success',
+                data: result,
+                status: 200
+            };
+        }
+
     }
 /*
     @Get('user')

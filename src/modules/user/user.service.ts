@@ -104,26 +104,31 @@ export class UserService extends BaseService<User>{
       throw new NotFoundException('User not found');
     }
 
+    const randomCode = this.generateRandomCode();
+    const hashedCode = await this.hashRandomCode(randomCode);
+
     const token = this.generateResetToken(user);
     user.passwordResetToken = token;
+    user.passwordResetCode = hashedCode
     user.passwordResetExpires = new Date(Date.now() + 600000); // 1 min
     await user.save();
-
+    //console.log(user.firstName)
     const resetLink = `http://localhost:5173/newPassword?token=${token}`;
 
-    await this.emailService.sendPasswordReset(user,resetLink)
+    await this.emailService.sendPasswordReset(user,resetLink,randomCode)
   }
 
   private generateResetToken(user): string {
     return `${Date.now()}${user._id}`;
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
+  async resetPassword(token: string, newPassword: string,code:string): Promise<void> {
     const user = await this.userModel.findOne({passwordResetToken:token});
-    if (!user || new Date() > user.passwordResetExpires) {
+    if (!user || new Date() > user.passwordResetExpires || !(await this.compareCodes(code,user.passwordResetCode)) ) {
       throw new NotFoundException('Invalid or expired token');
     }
 
+    console.log(user.firstName)
 
     const newHashedPassword = await bcrypt.hash(newPassword, 12);
 
@@ -131,8 +136,32 @@ export class UserService extends BaseService<User>{
     user.passwordChangedAt = new Date(); // Update passwordChangedAt field
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
+    user.passwordResetCode = undefined;
     await user.save();
   }
 
+  // Function to generate a random code
+   generateRandomCode = (): string => {
+    return Math.random().toString(36).substring(2, 8); // Example: Generates a 6-character random code
+  };
+
+  // Function to hash a code
+   hashRandomCode = async (code: string): Promise<string> => {
+    const saltRounds = 10;
+    const hashedCode = await bcrypt.hash(code, saltRounds);
+    return hashedCode;
+  };
+  // Function to compare hashed code with user input
+   compareCodes = async (userInputCode: string, hashedCode: string): Promise<boolean> => {
+    try {
+      // Compare the user input (hashed) with the hashed code from the database
+      return await bcrypt.compare(userInputCode, hashedCode);
+
+    } catch (error) {
+      // Handle error
+      console.error('Error comparing codes:', error);
+      return false; // Return false in case of error
+    }
+  };
 
 }

@@ -50,6 +50,9 @@ export class User {
     passwordResetToken: string;
 
     @Prop()
+    passwordResetCode: string;
+
+    @Prop()
     passwordResetExpires: Date;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'UserSettings' })
