@@ -29,7 +29,8 @@ export class AuthController {
     //@UsePipes(new ValidationPipe())
     async createUser(@Body() createdUserDto: CreateUserDto) {
         const { password, role, ...restOfAttributes } = createdUserDto;
-        const settings = await new this.userSettingsModel().save();
+        const settings =  new this.userSettingsModel({emailPhoto:false});
+        await settings.save();
 
         const roleDocument = await this.roleModel.findOne({ role }).exec();
         if (!roleDocument) {
@@ -38,7 +39,7 @@ export class AuthController {
 
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = new this.userModel({ password: hashedPassword, settings, role: roleDocument, ...restOfAttributes });
-        return newUser.save();
+        return await newUser.save();
     }
 
 
@@ -75,8 +76,8 @@ export class AuthController {
         const findedUser = await this.userModel.findOne({ email:oAuth.email }).populate('role settings').lean().exec();
 
         if (!findedUser) {
-            const settings = await new this.userSettingsModel().save();
-
+            const settings =  new this.userSettingsModel({emailPhoto:true});
+            await settings.save();
             const roleDocument = await this.roleModel.findOne({ role:UserRoles.user }).exec();
             if (!roleDocument) {
                 throw new NotFoundException('no role like that');

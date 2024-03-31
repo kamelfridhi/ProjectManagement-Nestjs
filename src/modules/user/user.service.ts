@@ -27,7 +27,13 @@ export class UserService extends BaseService<User>{
     }
 
   async  updateImgProp(id: string,filename:string) {
-    return await  this.userModel.findOneAndUpdate({_id:id}, {photo: filename}, {new: true});
+    const user = await super.findOneForImgUpload(id, ['settings', 'role', 'teams']);
+    const userSettings = user.settings;
+
+    user.photo = filename;
+    userSettings.emailPhoto=false;
+    await userSettings.save();
+    return await user.save();
   }
     getAllUsers() {
        return super.findAll();

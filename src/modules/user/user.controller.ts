@@ -8,7 +8,7 @@ import {
     Controller,
     Delete,
     Get,
-    HttpException, Logger,
+    HttpException, Logger, NotFoundException,
     Param,
     Patch,
     Post, Query,
@@ -71,29 +71,33 @@ export class UserController {
 
             // Update user image property in the database
             const user = await this.usersService.updateImgProp(userID, file.filename);
-
-            return { filename: file.filename };
+            return { user, filename: file.filename };
         }
 
         @Get('image/:userId')
         async getUserImage(@Param('userId') userId: string, @Res() res: Response) {
             try {
                 this.logger.log(`Fetching image for user with ID: ${userId}`);
-                const user = await this.usersService.findOne(userId);
+                const data = await this.usersService.getOneUser(userId);
+                const user = data.data;
 
                 if (!user || !user.photo) {
                     this.logger.warn(`User image not found for user with ID: ${userId}`);
                     return res.status(404).send('User image not found');
                 }
 
-                const contentType = 'image/jpeg'; // Change this based on the actual file type
-                res.header('Content-Type', contentType);
-
                 this.logger.log(`Sending image for user with ID: ${userId}`);
-                return res.sendFile(user.photo, { root: 'uploads' }); // Assuming 'uploads' is the directory where user images are stored
+
+                if (user.settings && user.settings.emailPhoto) {
+                    return res.json({ userEmailPic: user.photo }); // Return the image URL
+                } else {
+                    const contentType = 'image/jpeg'; // Change this based on the actual file type
+                    res.header('Content-Type', contentType);
+                    return res.sendFile(user.photo, { root: 'uploads' }); // Send the image file
+                }
             } catch (error) {
-                this.logger.error(`Error fetching image for user with ID: ${userId}`, error);
-                return res.status(500).send('Internal server error');
+                this.logger.error(`Error fetching user image: ${error.message}`);
+                throw new NotFoundException('User image not found');
             }
         }
 

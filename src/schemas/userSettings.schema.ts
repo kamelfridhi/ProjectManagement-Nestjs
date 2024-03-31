@@ -11,6 +11,11 @@ export class UserSettings{
     @Prop({ default: false })
     blocked: boolean;
 
+    @Prop()
+    emailPhoto: boolean;
+
+
+
 
     
 }
