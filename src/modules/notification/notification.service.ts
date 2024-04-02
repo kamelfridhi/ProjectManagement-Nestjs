@@ -18,7 +18,8 @@ export class NotificationService {
         const notification = new this.notificationModel({
             message: notificationMessage,
             pending: team ,// Save the team ID in the pending field
-            user:userId
+            user:userId,
+            type:"invite"
         });
         await notification.save();
 

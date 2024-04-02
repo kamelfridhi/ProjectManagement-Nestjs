@@ -22,11 +22,20 @@ import { AssignTaskDto } from "./dto/assignTask.dto";
 import {TeamCategoryEnum} from "../../schemas/enums/team.category.enum";
 import {User} from "../../schemas/user.schema";
 import {UserRoles} from "../../schemas/enums/user.roles";
+import {SendChatMessageDto} from "./dto/SendChatMessage.dto";
+import {ChatMessage} from "../../schemas/ChatMessage.schema";
+import {TeamWebSocketGateway} from "./team.websocket.gateway";
+import any = jasmine.any;
+import {Types} from "mongoose";
+import {Team} from "../../schemas/team.schema";
 
 @Controller('team')
 export class TeamController {
- 
-  constructor(private readonly teamService: TeamService) { }
+
+  constructor(
+      private readonly teamService: TeamService,
+      private readonly teamWebSocketGateway: TeamWebSocketGateway, // Inject WebSocket gateway or service
+  ) {}
   @Get('all/:teamId/:role')
   async getUsersNotInTeam(
       @Param('teamId') teamId: string,
@@ -132,5 +141,36 @@ export class TeamController {
       throw new InternalServerErrorException(error.message);
     }
   }
+ @Post('/reject-invitation/:notificationId')
+  async rejectinvite(
+       @Param('notificationId') notificationId: string
+  ) {
+    try {
+      await this.teamService.rejectTeamInvitation(notificationId);
+      return { message: 'Team invitation rejected' };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+  @Post(':teamId/chat/send')
+  async sendChatMessage(
+      @Param('teamId') teamId: string,
+      @Body() sendChatMessageDto: SendChatMessageDto,
+  ): Promise<void> {
+    const { senderId, content } = sendChatMessageDto;
+    await this.teamService.sendChatMessage(teamId, senderId, content);
+    const chatMessage: { sender: User; content: string; timestamp: Date } = { sender: senderId, content, timestamp: new Date() };
 
+     this.teamWebSocketGateway.sendChatMessageToClients(chatMessage);
+
+  }
+
+  @Get(':teamId/chat')
+  async getChatMessages(@Param('teamId') teamId: string): Promise<ChatMessage[]> {
+    return this.teamService.getChatMessages(teamId);
+  }
+  @Get('user/:userId/teams')
+  async getTeamsForUser(@Param('userId') userId: string): Promise<Team[]> {
+    return this.teamService.getTeamsForUser(userId);
+  }
 }

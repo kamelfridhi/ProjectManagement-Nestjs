@@ -2,11 +2,11 @@
 https://docs.nestjs.com/providers#services
 */
 
-import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {Model} from 'mongoose';
 import {BaseService} from 'src/global-utils/base.service';
-import {Team} from 'src/schemas/team.schema';
+import { Team} from 'src/schemas/team.schema';
 import {CreateTeamDto} from "./dto/createTeam.dto";
 import {UpdateTeamDto} from "./dto/updateTeam.dto";
 import {User} from "../../schemas/user.schema";
@@ -14,6 +14,7 @@ import {Project} from "../../schemas/project.schema";
 import {Task} from 'src/schemas/task.schema';
 import {NotificationService} from "../notification/notification.service";
 import {Notification} from "../../schemas/notification.schema";
+import {ChatMessage} from "../../schemas/ChatMessage.schema";
 
 @Injectable()
 export class TeamService extends BaseService<Team> {
@@ -24,6 +25,7 @@ export class TeamService extends BaseService<Team> {
     constructor(
 
         @InjectModel(Team.name) private TeamModel: Model<Team>,
+        @InjectModel(ChatMessage.name) private readonly chatMessageModel: Model<ChatMessage>,
         @InjectModel(User.name) private UserModel: Model<User>,
         @InjectModel(Notification.name) private notificationModel: Model<Notification>,
         @InjectModel(Project.name) private ProjectModel: Model<Project>,
@@ -202,17 +204,20 @@ export class TeamService extends BaseService<Team> {
         throw new Error('Team not found');
       }
 
+      // Find notifications for the team
+      const notifications = await this.notificationModel.find({ pending: teamId }).exec();
+      const userIds = notifications.map(notification => notification.user);
+
       // Find users who are not in the team and have the specified role
       const users = await this.UserModel.find({
         teams: { $ne: teamId },
+        _id: { $nin: userIds } // Exclude users with pending notifications for the specified team
       }).populate('role').exec();
-      console.log("tgerzeareazeraz"+users);
+
       // Filter users based on the specified role and number of teams
-      const usersWithRoleAndFewerTeams = users.filter(user =>
+      return users.filter(user =>
            user.role.role === roleName && (!user.teams || user.teams.length < 3)
-      );
-      console.log("azeazeazeazeae"+usersWithRoleAndFewerTeams);
-      return usersWithRoleAndFewerTeams;
+       );
     } catch (error) {
       throw new Error(`Error fetching users: ${error.message}`);
     }
@@ -250,8 +255,7 @@ export class TeamService extends BaseService<Team> {
     try {
       // Find the user by ID and populate the 'notifications' field
       const user = await this.UserModel.findById(userId).populate('notifications').exec();
-      console.log("eazeaze"+user);
-      if (!user) {
+       if (!user) {
         throw new NotFoundException('User not found');
       }
 
@@ -278,6 +282,13 @@ export class TeamService extends BaseService<Team> {
       // Get the team ID from the pending field of the notification
       const teamId = notification.pending.toString();
 
+      // Check if the user is already a member of three teams
+      if (user.teams.length >= 3) {
+        await this.notificationModel.deleteOne({ _id: notificationId });
+
+        throw new Error('User is already a member of three teams');
+      }
+
       // Remove the notification from the user's pending notifications
       user.notifications = user.notifications.filter(notif => notif.toString() !== notificationId);
       await user.save();
@@ -291,9 +302,77 @@ export class TeamService extends BaseService<Team> {
       throw new Error(`Error accepting team invitation: ${error.message}`);
     }
   }
+  async rejectTeamInvitation(notificationId: string): Promise<void> {
+    try {
+      // Find the user by ID
+      // Find the notification by ID
+      const notification = await this.notificationModel.findById(notificationId);
+      if (!notification) {
+        throw new NotFoundException('Notification not found');
+      }
+
+      // Remove the notification from the database
+      await this.notificationModel.deleteOne({ _id: notificationId });
+    } catch (error) {
+      throw new Error(`Error accepting team invitation: ${error.message}`);
+    }
+  }
+
+  async sendChatMessage(teamId: string, senderId: User, content: string): Promise<void> {
+    try {
+      // Find the team by ID
+      const team = await this.TeamModel.findById(teamId);
+      if (!team) {
+        throw new Error('Team not found');
+      }
+
+      // Create a new chat message
+      const newMessage = new this.chatMessageModel({ sender: senderId, content:content });
+
+      // Add the new message to the team's chat
+      team.chat.push(newMessage) ;
+     await newMessage.save();
+      // Save the updated team document
+      await team.save();
+    } catch (error) {
+      throw new Error(`Error sending chat message: ${error.message}`);
+    }
 
 
+  }
+  async getChatMessages(teamId: string): Promise<ChatMessage[]> {
+    try {
+      // Find the team by ID and populate the chat messages
+      const team = await this.TeamModel.findById(teamId).populate('chat').exec();
+      if (!team) {
+        throw new Error('Team not found');
+      }
 
+      // Extract the chat messages from the team object
+      const chatMessages = team.chat;
+
+      return chatMessages;
+    } catch (error) {
+      throw new Error(`Error fetching chat messages: ${error.message}`);
+    }
+  }
+
+  async getTeamsForUser(userId: string): Promise<Team[]> {
+    try {
+      // Find the user by ID and populate the 'teams' field
+      const user = await this.UserModel.findById(userId).populate('teams').exec();
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Extract teams from the user object
+      const teams = user.teams;
+
+      return teams;
+    } catch (error) {
+      throw new Error(`Error fetching teams for user: ${error.message}`);
+    }
+  }
 
 
 

@@ -4,6 +4,7 @@ import { User } from "./user.schema";
 import { Project } from "./project.schema";
 import { TaskCategory } from "./enums/task.category";
 import { TeamCategoryEnum } from './enums/team.category.enum';
+import {ChatMessage} from "./ChatMessage.schema";
 
 @Schema()
 export class Team {
@@ -23,6 +24,9 @@ export class Team {
 
     @Prop({ type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }] })
     project: Project[];
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ChatMessage' }] })
+    chat: ChatMessage[]; // Array to store chat messages associated with the team
 
 
 }
