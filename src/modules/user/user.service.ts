@@ -27,7 +27,7 @@ export class UserService extends BaseService<User>{
     }
 
   async  updateImgProp(id: string,filename:string) {
-    const user = await super.findOneForImgUpload(id, ['settings', 'role', 'teams']);
+    const user = await super.findOneForSave(id, ['settings', 'role', 'teams']);
     const userSettings = user.settings;
 
     user.photo = filename;
@@ -85,6 +85,39 @@ export class UserService extends BaseService<User>{
         data: {
           user: updatedUser,
         },
+      };
+    } catch (error) {
+      // If NotFoundException is caught, return the error response with status 404
+      if (error instanceof NotFoundException) {
+        throw new HttpException({
+          status: 'error',
+          message: error.message,
+        }, HttpStatus.NOT_FOUND);
+      }
+
+      // For other errors, return the generic error response
+      throw new HttpException({
+        status: 'error',
+        message: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async importPhotoFromEmail(updateUserDto: UpdateUserDto, userId: string) {
+    try {
+      const { password, ...data } = updateUserDto;
+
+
+      // Update user document
+      const updatedUser = await this.userModel.findOneAndUpdate({ _id: userId }, data, { new: true, runValidators: true });
+      const user = await super.findOneForSave(userId, ['settings', 'role', 'teams']);
+      const userSettings = user.settings;
+      userSettings.emailPhoto=true;
+      await userSettings.save();
+      // Return success response with updated user data
+      return {
+        status: 'success',
+        user,
       };
     } catch (error) {
       // If NotFoundException is caught, return the error response with status 404

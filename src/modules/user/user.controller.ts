@@ -133,6 +133,12 @@ export class UserController {
         async updateMe(@Body() updateUserDto: UpdateUserDto, @Param('id') id:string ) {
           return  await this.usersService.updateMe(updateUserDto, id);
         }
+
+        @Patch('importPhotoFromEmail/:id')
+        //@UseGuards(AuthGuard) // Assuming you have an AuthGuard to verify user authentication
+        async importPhotoFromEmail(@Body() updateUserDto: UpdateUserDto, @Param('id') id:string ) {
+          return  await this.usersService.importPhotoFromEmail(updateUserDto, id);
+        }
         @Post('forgotPassword')
         //@UseGuards(AuthGuard) // Assuming you have an AuthGuard to verify user authentication
         async forgotPassword(@Body() data:{ email: string }  ) {

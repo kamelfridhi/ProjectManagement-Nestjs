@@ -33,7 +33,7 @@ export class BaseService<T> {
         return result;
     }
 
-    async findOneForImgUpload(id: string, populateOptions?: string[]): Promise<any> {
+    async findOneForSave(id: string, populateOptions?: string[]): Promise<any> {
         let query = this.model.findById(id);
         if (populateOptions && populateOptions.length == 1) {
             query = query.populate(populateOptions[0]);

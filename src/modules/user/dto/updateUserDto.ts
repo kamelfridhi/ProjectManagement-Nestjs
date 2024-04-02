@@ -24,6 +24,10 @@ export class UpdateUserDto {
     telephone?: string;
 
     @IsOptional()
+    @IsString()
+    photo?: string;
+
+    @IsOptional()
     @IsDateString()
     dateOfBirth?: Date;
 
