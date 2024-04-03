@@ -13,6 +13,7 @@ import { UpdateUserDto } from './dto/updateUserDto';
 import { UserSettings } from 'src/schemas/userSettings.schema';
 import { Role } from 'src/schemas/roles.schema';
 import { EmailService } from "./mail.service";
+import * as fs from 'fs';
 
 @Injectable()
 export class UserService extends BaseService<User>{
@@ -29,6 +30,18 @@ export class UserService extends BaseService<User>{
   async  updateImgProp(id: string,filename:string) {
     const user = await super.findOneForSave(id, ['settings', 'role', 'teams']);
     const userSettings = user.settings;
+    // Check if there's an existing photo associated with the user
+    if (user.photo && user.photo !== "user.png"){
+      // Remove the previous photo from the storage
+      const previousPhotoPath = `./uploads/${user.photo}`;
+      try {
+        // Delete the previous photo file
+        await fs.promises.unlink(previousPhotoPath);
+      } catch (error) {
+        // Handle any errors if the file deletion fails
+        console.error('Error deleting previous photo:', error);
+      }
+    }
 
     user.photo = filename;
     userSettings.emailPhoto=false;
@@ -93,6 +106,7 @@ export class UserService extends BaseService<User>{
 
 
       userSettings.statusAccount = 1;
+      userSettings.verifiedAccount = true;
       await userSettings.save();
       return await user.save();
 
@@ -111,6 +125,7 @@ export class UserService extends BaseService<User>{
 
 
       userSettings.statusAccount = -1;
+      userSettings.verifiedAccount = false;
       await userSettings.save();
       return await user.save();
 
