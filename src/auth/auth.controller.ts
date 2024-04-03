@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Req, Res, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -61,7 +61,11 @@ export class AuthController {
         const jwt = await this.jwtService.signAsync({ id: findedUser._id });
         const { password: _, ...result } = findedUser;
         // Set the JWT token as an HTTP-only cookie
+
         res.cookie('jwt', jwt, { httpOnly: true });
+        const userSettings = await this.userSettingsModel.findOne({ _id: findedUser.settings }).exec()
+        userSettings.statusOnline = true;
+        await userSettings.save();
 
         return {
             message: 'success',
@@ -76,7 +80,7 @@ export class AuthController {
         const findedUser = await this.userModel.findOne({ email:oAuth.email }).populate('role settings').lean().exec();
 
         if (!findedUser) {
-            const settings =  new this.userSettingsModel({emailPhoto:true});
+            const settings =  new this.userSettingsModel({emailPhoto:true,statusOnline:true});
             await settings.save();
             const roleDocument = await this.roleModel.findOne({ role:UserRoles.user }).exec();
             if (!roleDocument) {
@@ -89,6 +93,9 @@ export class AuthController {
             const jwt = await this.jwtService.signAsync({ id: newUser._id });
             const expire = new Date(Date.now()+3600000);
             res.cookie('jwt', jwt, { httpOnly: true });
+            const userSettings = await this.userSettingsModel.findOne({ _id: newUser.settings }).exec()
+            userSettings.statusOnline = true;
+            await userSettings.save();
           return {
             message: 'success',
             data: newUser,
@@ -99,6 +106,10 @@ export class AuthController {
             const { password: _, ...result } = findedUser;
             // Set the JWT token as an HTTP-only cookie
             res.cookie('jwt', jwt, { httpOnly: true });
+            const userSettings = await this.userSettingsModel.findOne({ _id: findedUser.settings }).exec()
+            userSettings.statusOnline = true;
+            await userSettings.save();
+
             return {
                 message: 'success',
                 data: result,
@@ -124,10 +135,15 @@ export class AuthController {
         }
     }
 */
-    @Post('logout')
-    async logout(@Res({ passthrough: true }) res: Response) {
+    @Post('logout/:userID')
+    async logout(@Res({ passthrough: true }) res: Response,@Param('userID') userId:string) {
+        const findedUser = await this.userModel.findOne({ _id: userId }).populate("role settings").lean().exec();
         // Clear the JWT cookie to log out the user
         res.clearCookie('jwt');
+        const userSettings = await this.userSettingsModel.findOne({ _id: findedUser.settings }).exec()
+        userSettings.statusOnline = false;
+        await userSettings.save();
+
         return { message: 'success' };
     }
 }

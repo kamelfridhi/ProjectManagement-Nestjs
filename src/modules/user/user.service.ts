@@ -39,6 +39,33 @@ export class UserService extends BaseService<User>{
        return super.findAll();
     }
 
+
+
+  async getUsersWithEtat(etat: number) {
+    try {
+      console.log(etat);
+      const users = await this.userModel.find().populate('settings');
+      // Filter users based on the statusAccount field in the populated settings
+      const filteredUsers = users.filter(user => user.settings.statusAccount == etat);
+      if(filteredUsers.length > 0){
+        return {
+          message: "success",
+          data: filteredUsers,
+          status: 200
+        };
+      }else{
+        return {
+          message: "no users found",
+          data: [],
+          status: 404
+        };
+      }
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+
   async  getOneUser(id: string) {
         const user = await super.findOne(id, ['settings', 'role', 'teams']);
         const {password,...result} = user;
@@ -59,6 +86,40 @@ export class UserService extends BaseService<User>{
         return super.update(id, updateUserDto);
     }
 
+  async acceptUser(id: string) {
+    try {
+      const user = await super.findOneForSave(id, ['settings', 'role', 'teams']);
+      const userSettings = user.settings;
+
+
+      userSettings.statusAccount = 1;
+      await userSettings.save();
+      return await user.save();
+
+    } catch (error) {
+      // Handle any errors
+      console.error('Error accepting user:', error);
+      throw error; // Rethrow the error to be caught by the caller
+    }
+  }
+
+
+  async declinetUser(id: string) {
+    try {
+      const user = await super.findOneForSave(id, ['settings', 'role', 'teams']);
+      const userSettings = user.settings;
+
+
+      userSettings.statusAccount = -1;
+      await userSettings.save();
+      return await user.save();
+
+    } catch (error) {
+      // Handle any errors
+      console.error('Error accepting user:', error);
+      throw error; // Rethrow the error to be caught by the caller
+    }
+  }
     deleteUser(id: string) {
         return super.remove(id);
     }

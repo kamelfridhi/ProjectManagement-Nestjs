@@ -105,6 +105,10 @@ export class UserController {
     getAllUsers() {
         return this.usersService.getAllUsers();
     }
+    @Get('getUsersEtat/:etat')
+    getUsersWithEtat(@Param('etat')etat:number) {
+        return this.usersService.getUsersWithEtat(etat);
+    }
 
     @Get(':id')
     async getOneUser(@Param('id') id: string) {
@@ -118,6 +122,14 @@ export class UserController {
         const updatedUser = await this.usersService.updateUser(id, updatedUserDto);
         if (!updatedUser) throw new HttpException('User not found', 404);
         return updatedUser;
+    }
+    @Patch('accept/:id')
+    async acceptUser(@Param('id') id: string) {
+       return  await this.usersService.acceptUser(id);
+    }
+    @Patch('decline/:id')
+    async declinetUser(@Param('id') id: string) {
+       return  await this.usersService.declinetUser(id);
     }
 
     @Delete(':id')
