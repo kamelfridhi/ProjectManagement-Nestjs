@@ -11,6 +11,7 @@ services:
       - "27017:27017"
     volumes:
       - ./data/dump:/dump
+
   app:
     build: .
     image: 192.168.1.16:8090/nodemongoapp:6.0
@@ -21,4 +22,7 @@ services:
     depends_on:
       - db
     volumes:
-      - mongo-data:
+      - mongo-data:/path/in/container   # Adjust this path as needed
+
+volumes:
+  mongo-data:  # Define a named volume here
