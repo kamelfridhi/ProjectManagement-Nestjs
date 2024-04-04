@@ -12,7 +12,7 @@ import {StatusModule} from "./modules/status/status.module";
 @Module({
   imports: [
     AuthModule,
-    MongooseModule.forRoot('mongodb://127.0.0.1/project-managment'),
+    MongooseModule.forRoot('mongodb://192.168.1.16:27017/project-managment'),
     UserModule,
     TeamModule,
     TaskModule,
