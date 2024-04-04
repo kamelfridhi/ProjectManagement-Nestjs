@@ -21,11 +21,12 @@ pipeline{
         }
       }
     }
-  stage('Build application') {
+     // Building Docker images
+    stage('Building images (node and mongo)') {
       steps{
         
         script {
-         sh('npm run twicedegro')
+         sh('docker-compose build')
         }
       }
     }
