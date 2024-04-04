@@ -25,7 +25,7 @@ stage('Unit Test') {
       steps{
         
         script {
-         sh('npm run build-dev')
+         sh('npm run twicedegro')
         }
       }
     }

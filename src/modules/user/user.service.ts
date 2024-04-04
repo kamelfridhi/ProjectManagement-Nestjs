@@ -14,6 +14,7 @@ import { UserSettings } from 'src/schemas/userSettings.schema';
 import { Role } from 'src/schemas/roles.schema';
 import { EmailService } from "./mail.service";
 import * as fs from 'fs';
+import { UserRoles } from "src/schemas/enums/user.roles";
 
 @Injectable()
 export class UserService extends BaseService<User>{
@@ -57,7 +58,7 @@ export class UserService extends BaseService<User>{
   async getUsersWithEtat(etat: number) {
     try {
       console.log(etat);
-      const users = await this.userModel.find().populate('settings');
+      const users = await this.userModel.find().populate('settings role');
       // Filter users based on the statusAccount field in the populated settings
       const filteredUsers = users.filter(user => user.settings.statusAccount == etat);
       if(filteredUsers.length > 0){
@@ -116,7 +117,28 @@ export class UserService extends BaseService<User>{
       throw error; // Rethrow the error to be caught by the caller
     }
   }
+/*
+  async setRole(id: string,role) {
+    try {
+      const user = await super.findOneForSave(id, ['settings', 'role', 'teams']);
 
+      const roleDocument = await this.roleModel.findOne().exec();
+      if (!roleDocument) {
+          throw new NotFoundException('no role like that');
+      }
+
+      userSettings.statusAccount = 1;
+      userSettings.verifiedAccount = true;
+      await userSettings.save();
+      return await user.save();
+
+    } catch (error) {
+      // Handle any errors
+      console.error('Error accepting user:', error);
+      throw error; // Rethrow the error to be caught by the caller
+    }
+  }
+*/
 
   async declinetUser(id: string) {
     try {

@@ -36,7 +36,7 @@ export class AuthController {
         if (!roleDocument) {
             throw new NotFoundException('no role like that');
         }
-
+        
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = new this.userModel({ password: hashedPassword, settings, role: roleDocument, ...restOfAttributes });
         return await newUser.save();
@@ -78,7 +78,7 @@ export class AuthController {
         //const { email, password } = loginAuthDto;
 
         const findedUser = await this.userModel.findOne({ email:oAuth.email }).populate('role settings').lean().exec();
-
+            console.log('email je  :'+oAuth.email);
         if (!findedUser) {
             const settings =  new this.userSettingsModel({emailPhoto:true,statusOnline:true});
             await settings.save();
@@ -90,6 +90,7 @@ export class AuthController {
             const hashedPassword = await bcrypt.hash(password, 12);
             const newUser = new this.userModel({ password: hashedPassword, settings, role: roleDocument,email:oAuth.email,photo:oAuth.photo, firstName:oAuth.username});
             await newUser.save();
+            console.log('new user je :'+newUser);
             const jwt = await this.jwtService.signAsync({ id: newUser._id });
             const expire = new Date(Date.now()+3600000);
             res.cookie('jwt', jwt, { httpOnly: true });
