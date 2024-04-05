@@ -24,7 +24,7 @@ pipeline{
         stage('SonarQube Analysis') {
             steps {
                 catchError(buildResult: 'UNSTABLE') {
-                    sh 'sonar-scanner -Dsonar.host.url=http://192.168.1.16:9000/ -Dsonar.login=admin -Dsonar.password=123'
+                  sh '/path/to/sonar-scanner -Dsonar.host.url=http://192.168.1.16:9000/ -Dsonar.login=admin -Dsonar.password=123'
                 }
             }
         }
