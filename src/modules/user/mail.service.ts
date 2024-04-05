@@ -20,7 +20,7 @@ export class EmailService {
   }
 
   // Method to send the actual email
-  async send(template: string, subject: string, user: any, url: string, randomCode: string) {
+  async send(template: string, subject: string, user?: any, url?: string, randomCode?: string,myRandomPaswword?:string) {
     try {
 
 
@@ -30,7 +30,8 @@ export class EmailService {
         name: user.firstName,
         url: url,
         subject: subject,
-        randomCode: randomCode
+        randomCode: randomCode,
+        myRandomPaswword:myRandomPaswword,
       });
 
 
@@ -63,4 +64,14 @@ export class EmailService {
       throw new Error('Failed to send password reset email');
     }
   }
+
+  async sendPassword(user: any, password: string) {
+    try {
+      await this.send('sendPassword', 'Your Random Password', user,null,null,password);
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      throw new Error('Failed to send password reset email');
+    }
+  }
+// Method to send email verification email
 }

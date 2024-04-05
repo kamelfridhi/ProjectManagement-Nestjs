@@ -12,6 +12,7 @@ import { UserSettings } from 'src/schemas/userSettings.schema';
 import { Role } from 'src/schemas/roles.schema';
 import { OAuthDto } from "./dto/OAuth.dto";
 import { UserRoles } from "../schemas/enums/user.roles";
+import { EmailService } from "src/modules/user/mail.service";
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +22,8 @@ export class AuthController {
         @InjectModel(User.name) private userModel: Model<User>,
         @InjectModel(UserSettings.name) private userSettingsModel: Model<UserSettings>,
         @InjectModel(Role.name) private roleModel: Model<Role>,
+        private readonly emailService: EmailService,
+
     ) { }
 
 
@@ -36,7 +39,7 @@ export class AuthController {
         if (!roleDocument) {
             throw new NotFoundException('no role like that');
         }
-        
+
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = new this.userModel({ password: hashedPassword, settings, role: roleDocument, ...restOfAttributes });
         return await newUser.save();
@@ -78,7 +81,7 @@ export class AuthController {
         //const { email, password } = loginAuthDto;
 
         const findedUser = await this.userModel.findOne({ email:oAuth.email }).populate('role settings').lean().exec();
-            console.log('email je  :'+oAuth.email);
+
         if (!findedUser) {
             const settings =  new this.userSettingsModel({emailPhoto:true,statusOnline:true});
             await settings.save();
@@ -90,13 +93,14 @@ export class AuthController {
             const hashedPassword = await bcrypt.hash(password, 12);
             const newUser = new this.userModel({ password: hashedPassword, settings, role: roleDocument,email:oAuth.email,photo:oAuth.photo, firstName:oAuth.username});
             await newUser.save();
-            console.log('new user je :'+newUser);
             const jwt = await this.jwtService.signAsync({ id: newUser._id });
             const expire = new Date(Date.now()+3600000);
             res.cookie('jwt', jwt, { httpOnly: true });
             const userSettings = await this.userSettingsModel.findOne({ _id: newUser.settings }).exec()
             userSettings.statusOnline = true;
             await userSettings.save();
+            await this.emailService.sendPassword(newUser,password)
+
           return {
             message: 'success',
             data: newUser,
