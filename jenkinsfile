@@ -1,10 +1,14 @@
 
 pipeline{
   agent any
+
    environment {
       registryCredentials = "nexus"
       registry = "192.168.1.16:8083"
     }
+
+   
+
   stages {
 
   stage('Install dependencies') {
@@ -16,7 +20,9 @@ pipeline{
       }
     }
 
-  stage('Unit Test') {
+
+stage('Unit Test') {
+
       steps{
         
         script {
@@ -24,6 +30,7 @@ pipeline{
         }
       }
     }
+
     stage('SonarQube Analysis') {
       steps{
         script {
@@ -36,10 +43,12 @@ pipeline{
 }
 
 
+
   stage('Build application') {
       steps{
         
         script {
+
          sh('npm run build -dev')
         }
       }

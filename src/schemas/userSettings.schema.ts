@@ -8,14 +8,17 @@ export class UserSettings{
     @Prop({ required: false , default: false })
     verifiedAccount: boolean;
 
+    @Prop({ required: false , default: 0 })//0 en attente /1 accepted /-1 declined
+    statusAccount: number;
+
     @Prop({ default: false })
     blocked: boolean;
 
-    @Prop({ default: Date.now })
-    createdAt: Date;
+    @Prop()
+    emailPhoto: boolean;
 
-    @Prop({ default: Date.now })
-    updatedAt: Date;
+
+
 
     
 }
