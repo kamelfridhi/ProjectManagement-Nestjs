@@ -51,6 +51,13 @@ pipeline{
     }
   }
 }
+stage('Check Docker Login') {
+            steps {
+                script {
+                    sh('docker login -u <username> -p <password> http://${registry}')
+                }
+            }
+        }
   stage('Deploy to Nexus') {
     steps{
       script {
