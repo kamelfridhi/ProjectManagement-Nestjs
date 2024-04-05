@@ -4,7 +4,7 @@ pipeline{
 
    environment {
       registryCredentials = "nexus"
-      registry = "192.168.1.16:8083"
+      registry = "192.168.56.11:8083"
     }
 
    
