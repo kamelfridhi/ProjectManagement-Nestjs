@@ -33,7 +33,7 @@ pipeline{
       steps{
         
         script {
-         sh('npm run twicedegro -dev')
+         sh('npm run build -dev')
         }
       }
     }
