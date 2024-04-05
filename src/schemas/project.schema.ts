@@ -21,9 +21,9 @@ export class Project {
     @Prop()
     endDate: Date;
 
-    @Prop()
-    tasks: Task;
-
+    
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }] })
+    tasks: Task[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
     teams: Team[];
 
