@@ -33,6 +33,20 @@ export class BaseService<T> {
         return result;
     }
 
+    async findOneForSave(id: string, populateOptions?: string[]): Promise<any> {
+        let query = this.model.findById(id);
+        if (populateOptions && populateOptions.length == 1) {
+            query = query.populate(populateOptions[0]);
+        } else if (populateOptions && populateOptions.length > 1) {
+            query = query.populate(populateOptions.join(' '));
+        }
+        const result = await query.exec();
+        if (!result) {
+            throw new NotFoundException(`Entity with id ${id} not found`);
+        }
+        return result;
+    }
+
     async update(id: string, updateDto: Partial<T>): Promise<T> {
         return this.model.findByIdAndUpdate(id, updateDto, { new: true });
     }

@@ -8,17 +8,22 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD:
     ports:
-      - "27017:27017"
+
+      - "27018:27017"
     volumes:
       - ./data/dump:/dump
   app:
     build: .
-    image: 192.168.1.144:8083/nodemongoapp:6.0
+    image: 192.168.1.16:8083/nodemongoapp:6.0
     restart: always
     container_name: back
     ports:
-      - "3000:3000"
+      - "5000:5000"
     depends_on:
       - db
     volumes:
-      - mongo-data:
+      - mongo-data:/path/in/container   # Adjust this path as needed
+
+volumes:
+  mongo-data:  # Define a named volume here
+
