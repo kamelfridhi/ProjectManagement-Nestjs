@@ -16,7 +16,7 @@ import { MulterModule } from "@nestjs/platform-express";
       dest: './uploads', // Specify the destination folder for uploaded files
     }),
     AuthModule,
-    MongooseModule.forRoot('mongodb://127.0.0.1/project-managment'),
+    MongooseModule.forRoot('mongodb://192.168.1.16:27017/project-managment'),
     UserModule,
     TeamModule,
     TaskModule,
