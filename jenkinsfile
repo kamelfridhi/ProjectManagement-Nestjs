@@ -54,7 +54,7 @@ pipeline{
 stage('Check Docker Login') {
             steps {
                 script {
-                    sh('docker login -u <username> -p <password> http://${registry}')
+                    sh('docker login -u admin -p 123 http://${registry}')
                 }
             }
         }
