@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { TaskCategory } from "../../../schemas/enums/task.category";
-import { TeamCategory } from "../../../schemas/enums/team.category";
+import { TeamCategoryEnum } from "../../../schemas/enums/team.category.enum";
 
 export class CreateTeamDto{
  @IsNotEmpty()
@@ -14,7 +14,7 @@ export class CreateTeamDto{
 
 
   @IsNotEmpty()
-  @IsEnum(TeamCategory)
-  category: TeamCategory;
+  @IsEnum(TeamCategoryEnum)
+  category: TeamCategoryEnum;
  
 }

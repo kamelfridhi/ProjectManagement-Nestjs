@@ -1,4 +1,5 @@
 
+
 pipeline{
   agent any
 
@@ -13,7 +14,7 @@ pipeline{
 
   stage('Install dependencies') {
       steps{
-        
+
         script {
          sh('npm install')
         }
@@ -21,15 +22,18 @@ pipeline{
     }
 
 
+
 stage('Unit Test') {
 
       steps{
         
+
         script {
          sh('npm test')
         }
       }
     }
+
 
     stage('SonarQube Analysis') {
       steps{
@@ -80,6 +84,7 @@ stage('Unit Test') {
           }
         }
     }
+
 
     }
 }
