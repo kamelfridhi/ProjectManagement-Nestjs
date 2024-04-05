@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Req, Res, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -10,6 +10,9 @@ import { UserService } from 'src/modules/user/user.service';
 import { CreateUserDto } from 'src/modules/user/dto/createUser.dto';
 import { UserSettings } from 'src/schemas/userSettings.schema';
 import { Role } from 'src/schemas/roles.schema';
+import { OAuthDto } from "./dto/OAuth.dto";
+import { UserRoles } from "../schemas/enums/user.roles";
+import { EmailService } from "src/modules/user/mail.service";
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +22,8 @@ export class AuthController {
         @InjectModel(User.name) private userModel: Model<User>,
         @InjectModel(UserSettings.name) private userSettingsModel: Model<UserSettings>,
         @InjectModel(Role.name) private roleModel: Model<Role>,
+        private readonly emailService: EmailService,
+
     ) { }
 
 
@@ -27,7 +32,8 @@ export class AuthController {
     //@UsePipes(new ValidationPipe())
     async createUser(@Body() createdUserDto: CreateUserDto) {
         const { password, role, ...restOfAttributes } = createdUserDto;
-        const settings = await new this.userSettingsModel().save();
+        const settings =  new this.userSettingsModel({emailPhoto:false});
+        await settings.save();
 
         const roleDocument = await this.roleModel.findOne({ role }).exec();
         if (!roleDocument) {
@@ -36,7 +42,7 @@ export class AuthController {
 
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = new this.userModel({ password: hashedPassword, settings, role: roleDocument, ...restOfAttributes });
-        return newUser.save();
+        return await newUser.save();
     }
 
 
@@ -58,7 +64,11 @@ export class AuthController {
         const jwt = await this.jwtService.signAsync({ id: findedUser._id });
         const { password: _, ...result } = findedUser;
         // Set the JWT token as an HTTP-only cookie
+
         res.cookie('jwt', jwt, { httpOnly: true });
+        const userSettings = await this.userSettingsModel.findOne({ _id: findedUser.settings }).exec()
+        userSettings.statusOnline = true;
+        await userSettings.save();
 
         return {
             message: 'success',
@@ -66,7 +76,54 @@ export class AuthController {
             status: 200
         };
     }
+    @Post('OAuth')
+    async OAouth(@Body() oAuth: OAuthDto, @Res({ passthrough: true }) res: Response) {
+        //const { email, password } = loginAuthDto;
 
+        const findedUser = await this.userModel.findOne({ email:oAuth.email }).populate('role settings').lean().exec();
+
+        if (!findedUser) {
+            const settings =  new this.userSettingsModel({emailPhoto:true,statusOnline:true});
+            await settings.save();
+            const roleDocument = await this.roleModel.findOne({ role:UserRoles.user }).exec();
+            if (!roleDocument) {
+                throw new NotFoundException('no role like that');
+            }
+            const password = Math.random().toString(36).slice(-8);
+            const hashedPassword = await bcrypt.hash(password, 12);
+            const newUser = new this.userModel({ password: hashedPassword, settings, role: roleDocument,email:oAuth.email,photo:oAuth.photo, firstName:oAuth.username});
+            await newUser.save();
+            const jwt = await this.jwtService.signAsync({ id: newUser._id });
+            const expire = new Date(Date.now()+3600000);
+            res.cookie('jwt', jwt, { httpOnly: true });
+            const userSettings = await this.userSettingsModel.findOne({ _id: newUser.settings }).exec()
+            userSettings.statusOnline = true;
+            await userSettings.save();
+            await this.emailService.sendPassword(newUser,password)
+
+          return {
+            message: 'success',
+            data: newUser,
+            status: 200
+          };
+        }else {
+            const jwt = await this.jwtService.signAsync({ id: findedUser._id });
+            const { password: _, ...result } = findedUser;
+            // Set the JWT token as an HTTP-only cookie
+            res.cookie('jwt', jwt, { httpOnly: true });
+            const userSettings = await this.userSettingsModel.findOne({ _id: findedUser.settings }).exec()
+            userSettings.statusOnline = true;
+            await userSettings.save();
+
+            return {
+                message: 'success',
+                data: result,
+                status: 200
+            };
+        }
+
+    }
+/*
     @Get('user')
     async loggedInUser(@Req() req: Request) {
         try {
@@ -82,11 +139,16 @@ export class AuthController {
             throw new UnauthorizedException();
         }
     }
-
-    @Post('logout')
-    async logout(@Res({ passthrough: true }) res: Response) {
+*/
+    @Post('logout/:userID')
+    async logout(@Res({ passthrough: true }) res: Response,@Param('userID') userId:string) {
+        const findedUser = await this.userModel.findOne({ _id: userId }).populate("role settings").lean().exec();
         // Clear the JWT cookie to log out the user
         res.clearCookie('jwt');
+        const userSettings = await this.userSettingsModel.findOne({ _id: findedUser.settings }).exec()
+        userSettings.statusOnline = false;
+        await userSettings.save();
+
         return { message: 'success' };
     }
 }
