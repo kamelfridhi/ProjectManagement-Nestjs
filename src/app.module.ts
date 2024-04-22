@@ -10,6 +10,7 @@ import {StatusModule} from "./modules/status/status.module";
 import {NotificationModule} from "./modules/notification/notification.module";
 
 import { MulterModule } from "@nestjs/platform-express";
+import {TicketModule} from "./modules/ticket/ticket.module";
 
 
 
@@ -20,10 +21,11 @@ import { MulterModule } from "@nestjs/platform-express";
       dest: './uploads', // Specify the destination folder for uploaded files
     }),
     AuthModule,
-    MongooseModule.forRoot('mongodb://192.168.1.16:27017/project-managment'),
+    MongooseModule.forRoot('mongodb://127.0.0.1/project-managment'),
     UserModule,
     TeamModule,
     TaskModule,
+    TicketModule,
     StatusModule,
     ProjectModule,
     NotificationModule,
