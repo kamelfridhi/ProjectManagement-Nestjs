@@ -9,7 +9,9 @@ import {User, UserSchema} from "../../schemas/user.schema"; // Assurez-vous d'im
 @Module({
     imports: [
         MongooseModule.forFeature([
-            { name: Ticket.name, schema: TicketSchema },,{ name: StatusOfTask.name, schema: StatusOfTaskSchema },{ name: User.name, schema: UserSchema },
+            { name: Ticket.name, schema: TicketSchema },
+            { name: StatusOfTask.name, schema: StatusOfTaskSchema },
+            { name: User.name, schema: UserSchema },
         ])
     ],
     controllers: [TicketController],

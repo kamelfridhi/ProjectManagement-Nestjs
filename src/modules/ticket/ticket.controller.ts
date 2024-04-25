@@ -11,9 +11,9 @@ export class TicketController {
         return this.ticketService.getAllTickets();
     }
 
-    @Post()
-    async addTicket(@Body() ticketData: Partial<Ticket>): Promise<Ticket> {
-        return this.ticketService.addTicket(ticketData);
+    @Post(':userId')
+    async addTicket(@Body() ticketData: Partial<Ticket>,@Param('userId') userId: string): Promise<Ticket> {
+        return this.ticketService.addTicket(ticketData,userId);
     }
 
     @Put(':id')
