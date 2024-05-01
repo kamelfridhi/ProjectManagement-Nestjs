@@ -16,6 +16,7 @@ import { EmailService } from "./mail.service";
 import * as fs from 'fs';
 import { UserRoles } from "src/schemas/enums/user.roles";
 import { ChangeRoleDto } from "./dto/changeRole.dto";
+import { WebsocketGateway } from "./socket.io";
 
 @Injectable()
 export class UserService extends BaseService<User>{
@@ -23,7 +24,8 @@ export class UserService extends BaseService<User>{
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(UserSettings.name) private userSettingsModel: Model<UserSettings>,
     @InjectModel(Role.name) private roleModel: Model<Role>,
-    private readonly emailService: EmailService,
+
+  private readonly emailService: EmailService,
 
   ) {
     super(userModel);

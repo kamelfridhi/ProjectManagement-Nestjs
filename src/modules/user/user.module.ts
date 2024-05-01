@@ -7,16 +7,18 @@ import { UserSettings, UserSettingsSchema } from 'src/schemas/userSettings.schem
 import { Role, UserRoleSchema } from 'src/schemas/roles.schema';
 import { EmailService } from "./mail.service";
 
+import { WebsocketGateway } from "./socket.io"; // Import WebSocketGateway
+
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: User.name, schema: UserSchema },
-            { name: UserSettings.name, schema: UserSettingsSchema },
-            { name: Role.name, schema: UserRoleSchema },
-        ])
-    ],
-    controllers: [UserController],
-    providers: [UserService,EmailService],
-    exports:[UserService,EmailService]
+  imports: [
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: UserSettings.name, schema: UserSettingsSchema },
+      { name: Role.name, schema: UserRoleSchema },
+    ])
+  ],
+  controllers: [UserController],
+  providers: [UserService,EmailService,WebsocketGateway],
+  exports:[UserService,EmailService]
 })
 export class UserModule { }
