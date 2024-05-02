@@ -22,7 +22,9 @@ export class WebsocketGateway {
 
 
   constructor(private userService: UserService) {
+    
     console.log('WebsocketGateway constructor');
+    console.log("dehe : "+this.users.length);
   }
 
   @SubscribeMessage("Connect")
@@ -35,16 +37,17 @@ export class WebsocketGateway {
         this.users.push(user);
       }
     }
-    console.log(`User ${user.name} (${user.id}) connected`);
+    console.log(`xd ${user.name} (${user.id}) connected`);
   }
 
   @SubscribeMessage("userAccepted")
   handleUserAccepted(client: Socket, user: User): void {
 
-    this.userService.acceptUser(user.id);
     user.statusAccount = 1;
     user.verifiedAccount = true;
+
     console.log(this.users)
+    
     if(this.users){
 
       if(this.users.find(u => u.id == user.id)) {
@@ -52,6 +55,8 @@ export class WebsocketGateway {
         user.socketid=this.users.find(u => u.id == user.id).socketid
         console.log(user)
         this.server.to(user.socketid).emit('Accepted', user);
+        this.userService.acceptUser(user.id);
+
         console.log(`User ${user.name} (${user.id}) accepted`)
       }
     }
@@ -60,19 +65,19 @@ export class WebsocketGateway {
 
   @SubscribeMessage("userRejected")
   handleUserRejected(client: Socket, user: User): void {
-    this.userService.declinetUser(user.id);
     user.statusAccount = -1;
     user.verifiedAccount = false;
     if(this.users){
       if(this.users.find(u => u.id == user.id)) {
         user.socketid=this.users.find(u => u.id == user.id).socketid
         this.server.to(user.socketid).emit('userdeclined', user);
+        this.userService.declinetUser(user.id);
         console.log(`User ${user.name} (${user.id}) rejected`)
       }
     }
   }
   handleDisconnect(client: Socket): void {
-        this.users = this.users.filter(user => user.socketid !== client.id);
+    this.users = this.users.filter(user => user.socketid !== client.id);
 
   }
 
