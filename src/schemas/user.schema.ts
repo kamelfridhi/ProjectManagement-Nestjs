@@ -16,6 +16,9 @@ export class User {
     @Prop()
     lastName: string;
 
+    @Prop({ required: true, enum: ['male', 'female'] })
+    gendre: string;
+
     @Prop({ required: true, unique: true })
     email: string;
 
@@ -31,10 +34,14 @@ export class User {
     @Prop()
     telephone: string;
 
-    @Prop({default:0})
+    @Prop({ default: 0 })
     tryLogin: number;
 
-    @Prop({default:"user.png"})
+    @Prop({
+        default: function () {
+            return this.gendre === 'female' ? 'female.jpg' : 'user.png';
+        },
+    })
     photo: string;
 
     @Prop({ default: Date.now })

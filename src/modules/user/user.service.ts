@@ -19,23 +19,45 @@ import { ChangeRoleDto } from "./dto/changeRole.dto";
 import { WebsocketGateway } from "./socket.io";
 
 @Injectable()
-export class UserService extends BaseService<User>{
+export class UserService extends BaseService<User> {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(UserSettings.name) private userSettingsModel: Model<UserSettings>,
     @InjectModel(Role.name) private roleModel: Model<Role>,
 
-  private readonly emailService: EmailService,
+    private readonly emailService: EmailService,
 
   ) {
     super(userModel);
+  }
+
+
+  async getUserCount(): Promise<number> {
+    return await this.userModel.countDocuments().exec();
+  }
+
+  async getGenderDistribution(): Promise<{ male: number; female: number }> {
+    const maleCount = await this.userModel.countDocuments({ gendre: 'male' }).exec();
+    const femaleCount = await this.userModel.countDocuments({ gendre: 'female' }).exec();
+    return { male: maleCount, female: femaleCount };
+  }
+
+  async getAgeDistribution(): Promise<{ [ageGroup: string]: number }> {
+    const ageDistribution: { [ageGroup: string]: number } = {};
+    const users = await this.userModel.find().exec();
+    users.forEach(user => {
+      const age = new Date().getFullYear() - new Date(user.dateOfBirth).getFullYear();
+      const ageGroup = `${Math.floor(age / 10) * 10}-${Math.floor(age / 10) * 10 + 9}`;
+      ageDistribution[ageGroup] = (ageDistribution[ageGroup] || 0) + 1;
+    });
+    return ageDistribution;
   }
 
   async updateImgProp(id: string, filename: string) {
     const user = await super.findOneForSave(id, ['settings', 'role', 'teams']);
     const userSettings = user.settings;
     // Check if there's an existing photo associated with the user
-    if (user.photo && user.photo !== "user.png") {
+    if (user.photo && user.photo !== "user.png" && user.photo !== "female.jpg") {
       // Remove the previous photo from the storage
       const previousPhotoPath = `./uploads/${user.photo}`;
       try {
@@ -144,7 +166,7 @@ export class UserService extends BaseService<User>{
     }
   }
 
-    async blockUser(id: string) {
+  async blockUser(id: string) {
     try {
       const user = await super.findOneForSave(id, ['settings', 'role', 'teams']);
       const userSettings = user.settings;
@@ -164,7 +186,7 @@ export class UserService extends BaseService<User>{
     try {
       console.log(roleDto.role);
       const user = await super.findOneForSave(id, ['settings', 'role', 'teams']);
-      const roleDocument = await this.roleModel.findOne({role:roleDto.role}).exec();
+      const roleDocument = await this.roleModel.findOne({ role: roleDto.role }).exec();
       if (!roleDocument) {
         throw new NotFoundException('no role like that');
       }
@@ -341,5 +363,7 @@ export class UserService extends BaseService<User>{
       return false; // Return false in case of error
     }
   };
+
+
 
 }
