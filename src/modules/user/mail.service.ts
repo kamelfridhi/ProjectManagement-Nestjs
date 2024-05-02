@@ -1,11 +1,17 @@
 import * as nodemailer from 'nodemailer';
 import * as pug from 'pug';
 import * as path from 'path';
+import { InjectModel } from '@nestjs/mongoose';
+import { User } from 'src/schemas/user.schema';
+import { Model } from 'mongoose';
 
 export class EmailService {
   private transporter: nodemailer.Transporter;
 
-  constructor() {
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+
+  ) {
     // Initialize the nodemailer transporter with hardcoded values
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -83,4 +89,29 @@ export class EmailService {
       throw new Error('Failed to send hello email');
     }
   }
+  // Method to send email for user acceptance
+  async sendUserAcceptance(user: any) {
+    const fetchedUser = await this.userModel.findById(user.id).exec();
+    try {
+      //console.log('Sending user acceptance email to: ', user.email);
+      await this.send('acceptedUser', 'Your Application has been Accepted!', fetchedUser);
+    } catch (error) {
+      console.error('Error sending user acceptance email:', error);
+      throw new Error('Failed to send user acceptance email');
+    }
+  }
+
+  // Method to send email for user rejection
+  async sendUserRejection(user: any) {
+    try {
+      const fetchedUser = await this.userModel.findById(user.id).exec();
+
+      //console.log('Sending user rejection email to: ', user.email);
+      await this.send('declinedUser', 'Your Application has been Rejected!', fetchedUser);
+    } catch (error) {
+      console.error('Error sending user rejection email:', error);
+      throw new Error('Failed to send user rejection email');
+    }
+  }
+
 }

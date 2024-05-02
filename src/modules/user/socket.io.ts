@@ -1,6 +1,7 @@
 import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UserService } from "./user.service";
+import { EmailService } from './mail.service';
 
 interface User {
   id: string;
@@ -21,7 +22,7 @@ export class WebsocketGateway {
   users: User[] = [];
 
 
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService,private mailService:EmailService) {
     
     console.log('WebsocketGateway constructor');
     console.log("dehe : "+this.users.length);
@@ -55,7 +56,7 @@ export class WebsocketGateway {
         console.log(user)
         this.server.to(user.socketid).emit('Accepted', user);
         this.userService.acceptUser(user.id);
-
+        this.mailService.sendUserAcceptance(user)
         console.log(`User ${user.name} (${user.id}) accepted`)
       }
     }
@@ -71,6 +72,7 @@ export class WebsocketGateway {
         user.socketid=this.users.find(u => u.id == user.id).socketid
         this.server.to(user.socketid).emit('userdeclined', user);
         this.userService.declinetUser(user.id);
+        this.mailService.sendUserRejection(user);
         console.log(`User ${user.name} (${user.id}) rejected`)
       }
     }
