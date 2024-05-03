@@ -7,14 +7,15 @@ import { Sprint } from 'src/schemas/sprint.schema'; // Import Sprint schema
 export class sprintController {
     constructor(private sprintService: sprintService) {}
 
-    @Post()
-    async createSprint(@Body() createSprintDto: createSprintDto): Promise<Sprint> {
-        return await this.sprintService.createSprint(createSprintDto);
+    @Post( ':idproject')
+    async createSprint(@Body() createSprintDto: createSprintDto,@Param('idproject') idproject: string){
+        console.log(idproject)
+       return  await this.sprintService.createSprint(createSprintDto,idproject);
     }
 
-    @Get()
-    async getAll(): Promise<Sprint[]> {
-        return await this.sprintService.getSprints(); // Remove .exec() here
+    @Get(':idproject')
+     getAll(@Param('idproject') idproject: string)  {
+        return this.sprintService.getSprints(idproject); // Remove .exec() here
     }
 
     @Delete(':sprintName')

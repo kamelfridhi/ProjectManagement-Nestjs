@@ -175,4 +175,14 @@ export class UserController {
         return await this.usersService.resetPassword(token, password, code);
     }
 
+
+
+
+    @Get('teamuser/:id')
+    async getteamuser(@Param('id') id: string) {
+        const user = await this.usersService.getteamUser(id);
+        if (!user) throw new HttpException('User not found', 404);
+        return user;
+    }
+
 }

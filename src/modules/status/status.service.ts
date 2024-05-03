@@ -5,23 +5,30 @@ import { StatusOfTask} from '../../schemas/status.schema';
 import { CreateStatusDto } from './dto/createStatus.dto';
 import {Project} from "../../schemas/project.schema";
 import {UpdateStatusDto} from "./dto/updateStatus.dto";
+import {Sprint} from "../../schemas/sprint.schema";
 
 @Injectable()
 export class StatusService {
     constructor(
         @InjectModel(StatusOfTask.name) private statusModel: Model<StatusOfTask>,
         @InjectModel(Project.name) private projectModel: Model<Project>,
+        @InjectModel(Sprint.name) private sprintModel: Model<Sprint>
     ) {}
 
-    async createStatus(createStatusDto: CreateStatusDto , projectId: string): Promise<StatusOfTask> {
+    async createStatus(createStatusDto: CreateStatusDto , sprintid: string): Promise<StatusOfTask> {
 
-        const project = await this.projectModel.findById(projectId);
-        const createdStatus = new this.statusModel({project,...createStatusDto});
+        const sprint = await this.sprintModel.findById(sprintid);
+        console.log(sprintid)
+        const createdStatus = new this.statusModel({sprint,...createStatusDto});
         return await createdStatus.save();
     }
 
     async findAll(): Promise<StatusOfTask[]> {
         return this.statusModel.find().exec();
+    }
+
+    async findAllbysprint(idsprint: string): Promise<StatusOfTask[]> {
+        return this.statusModel.find({ sprint: idsprint }).exec();
     }
 
     async findOne(id: string): Promise<StatusOfTask> {

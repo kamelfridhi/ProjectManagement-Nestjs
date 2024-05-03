@@ -127,7 +127,7 @@ export class TeamService extends BaseService<Team> {
       if (!project) {
         throw new NotFoundException('project not found');
       } else {
-        project.teams.push(team);
+        project.teams.push(team._id.toString());
       }
       team.project.push(project);
       await team.save(); // Save the updated team document

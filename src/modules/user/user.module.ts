@@ -9,6 +9,7 @@ import { Role, UserRoleSchema } from 'src/schemas/roles.schema';
 import {Notification, NotificationSchema} from "../../schemas/notification.schema";
 
 import { EmailService } from "./mail.service";
+import {Project, projectSchema} from "../../schemas/project.schema";
 
 
 @Module({

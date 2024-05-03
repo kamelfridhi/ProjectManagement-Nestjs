@@ -43,7 +43,8 @@ export class Task{
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     assignPerson: User;
 
-
+    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'Sprint',required:false})
+    sprint: string;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

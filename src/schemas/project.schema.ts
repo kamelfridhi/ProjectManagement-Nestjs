@@ -25,7 +25,7 @@ export class Project {
     tasks: Task;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }] })
-    teams: Team[];
+    teams: String[];
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Sprint' }] })
     sprints: Sprint[];

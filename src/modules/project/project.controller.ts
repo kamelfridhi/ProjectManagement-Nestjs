@@ -42,4 +42,17 @@ export class projectController{
         return this.projectService.deleteProject(projectName);
     }
 
+    @Post(":teamId/:projectId")
+    affectteamtoproject(@Param('teamId') teamId: string, @Param('projectId') projectId: string) {
+        return this.projectService.affectteamtoproject(teamId,projectId)
+    }
+    @Post("disaffect/:teamId/:projectId")
+    disaffectteamtoproject(@Param('teamId') teamId: string, @Param('projectId') projectId: string) {
+        return this.projectService.disaffectteamfromproject(teamId,projectId)
+    }
+
+    @Get("getteambyproject/:projectid")
+    getTeambyproject(@Param('projectid') projectid:string){
+        return this.projectService.getTeambyproject(projectid)
+    }
 }

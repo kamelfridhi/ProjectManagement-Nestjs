@@ -13,11 +13,14 @@ export class projectService {
 
   constructor(
     @InjectModel(Project.name) private projectModel: Model<Project>,
+    @InjectModel(Team.name) private TeamModel: Model<Team>,
+
   )
   { }
 
   createProject(createProjectDto: createProjectDto) {
     const newProject = new this.projectModel(createProjectDto)
+
     return newProject.save();
   }
 
@@ -40,27 +43,28 @@ export class projectService {
   deleteProject(projectName: string) {
     return this.projectModel.findOneAndDelete({ projectName });
   }
-  /*
+
   async affectteamtoproject(teamId: string, projectId: string) {
+    console.log(teamId, projectId)
     try {
-      const team = await this.TeamModel.findById(teamId);
+
+      let team = await this.TeamModel.findById(teamId).exec();
       if (!team) {
         throw new NotFoundException('Team not found');
       }
 
 
-      // Check if the user already exists in the team
-      if (team.project.map(project => project.toString()).includes(projectId)) {
-        return team;
-      }
+
       const project = await this.projectModel.findById(projectId).exec();
+      console.log(project)
       if (!project) {
         throw new NotFoundException('project not found');
       } else {
-        project.teams.push(team);
+        if(!project.teams.find((team)=>team.toString()===teamId)){
+          project.teams.push(team._id.toString());
+        }
+
       }
-      team.project.push(project);
-      await team.save(); // Save the updated team document
       await project.save(); // Save the updated team document
 
       return team;
@@ -68,5 +72,42 @@ export class projectService {
       throw new Error(error.message);
     }
   }
-  */
+
+  async getTeambyproject(projectId: string) {
+    const project = await this.projectModel.findById(projectId).exec();
+    let teams=[]
+    for (const team of project.teams) {
+      teams.push(await this.TeamModel.findById(team).exec())
+    }
+    return teams;
+  }
+  async disaffectteamfromproject(teamId: string, projectId: string) {
+    console.log(teamId, projectId);
+    try {
+      let team = await this.TeamModel.findById(teamId).exec();
+      if (!team) {
+        throw new NotFoundException('Team not found');
+      }
+
+      const project = await this.projectModel.findById(projectId).exec();
+      console.log(project);
+      if (!project) {
+        throw new NotFoundException('Project not found');
+      } else {
+        // Find the index of the team ID in the project's teams array
+        const index = project.teams.findIndex(team => team.toString() === teamId);
+        if (index !== -1) {
+          // Remove the team ID from the project's teams array
+          project.teams.splice(index, 1);
+        }
+      }
+
+      await project.save(); // Save the updated project document
+
+      return team;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
 }
