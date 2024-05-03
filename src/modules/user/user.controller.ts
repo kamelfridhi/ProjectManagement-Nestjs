@@ -40,6 +40,20 @@ export class UserController {
     ) {
 
     }
+    @Get('count')
+    async getUserCount(): Promise<number> {
+      return await this.usersService.getUserCount();
+    }
+  
+    @Get('gender-distribution')
+    async getGenderDistribution(): Promise<{ male: number; female: number }> {
+      return await this.usersService.getGenderDistribution();
+    }
+  
+    @Get('age-distribution')
+    async getAgeDistribution(): Promise<{ [ageGroup: string]: number }> {
+      return await this.usersService.getAgeDistribution();
+    }
 
     @Post('upload/:userID')
     @UseInterceptors(FileInterceptor('image', {

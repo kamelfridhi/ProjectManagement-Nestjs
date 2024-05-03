@@ -12,7 +12,10 @@ import { EmailService } from "./mail.service";
 import {Project, projectSchema} from "../../schemas/project.schema";
 
 
+import { WebsocketGateway } from "./socket.io"; // Import WebSocketGateway
+
 @Module({
+
     imports: [
         MongooseModule.forFeature([
             { name: User.name, schema: UserSchema },
@@ -23,7 +26,7 @@ import {Project, projectSchema} from "../../schemas/project.schema";
         ])
     ],
     controllers: [UserController],
-    providers: [UserService,EmailService],
+    providers: [UserService,EmailService,WebsocketGateway],
     exports:[UserService,EmailService]
 })
 export class UserModule { }

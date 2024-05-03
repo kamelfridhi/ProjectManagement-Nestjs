@@ -23,6 +23,9 @@ export class Task{
     @Prop({ required: false })
     priority: TaskPriority;
 
+    @Prop({ required: false })
+    taskcomplexity:number;
+
     @Prop({ default: Date.now })
     creationDate: Date;
 

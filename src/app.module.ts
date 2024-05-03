@@ -22,7 +22,7 @@ import {TicketModule} from "./modules/ticket/ticket.module";
       dest: './uploads', // Specify the destination folder for uploaded files
     }),
     AuthModule,
-    MongooseModule.forRoot('mongodb://127.0.0.1/project-managment'),
+    MongooseModule.forRoot('mongodb+srv://yassinejallouli:Ub7PILeQooKLyeG1@picluserteamsphere.bcrby0d.mongodb.net/'),
     UserModule,
     TeamModule,
     TaskModule,
