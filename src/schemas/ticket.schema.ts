@@ -7,6 +7,9 @@ export class Ticket {
     @Prop({ required: true })
     subject: string;
 
+    @Prop({ required: false })
+    photo: string;
+
     @Prop({ default: Date.now })
     creationDate: Date;
 

@@ -9,7 +9,7 @@ import {
   Delete,
   Get,
   HttpException,
-  InternalServerErrorException,
+  InternalServerErrorException, NotFoundException,
   Param,
   Patch,
   Post
@@ -46,6 +46,16 @@ export class TeamController {
       return users;
     } catch (error) {
       throw new Error(`Error fetching users: ${error.message}`);
+    }
+  }
+
+  @Get(':id/users')
+  async getUsersOfTeamProject(@Param('id') id: string) {
+    try {
+      const users = await this.teamService.getusersOfTeamProject(id);
+      return { users };
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
   }
   @Get('categories')

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import {Model, Types} from 'mongoose';
 import { Task } from 'src/schemas/task.schema';
 import {CreateTaskDto, StatusOfTaskDTO} from './dto/createTask.dto';
 import { UpdateTaskDto } from './dto/updateTask.dto';
@@ -8,6 +8,7 @@ import {BaseService} from "../../global-utils/base.service";
 import {TaskStatus} from "../../schemas/enums/task.status";
 import {StatusOfTask} from "../../schemas/status.schema";
 import {User} from "../../schemas/user.schema";
+
 
 @Injectable()
 export class TaskService extends BaseService<Task> {
@@ -21,11 +22,12 @@ export class TaskService extends BaseService<Task> {
     }
 
     async createTask({assignPerson,...createTaskDto}: CreateTaskDto) {
-
+console.log("here",assignPerson)
+        console.log(createTaskDto)
         const newStatusTask = await this.statusOfTaskModel.findOne({status : TaskStatus.TODO}).exec()
         if (newStatusTask) {
 
-            const assigneUser= await this.userModel.findById(assignPerson).exec();
+            const assigneUser= await this.userModel.findById(new Types.ObjectId(assignPerson)).exec();
             const newTask = new this.taskModel({
                 ...createTaskDto,
                 assignPerson: assigneUser._id,

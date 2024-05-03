@@ -39,6 +39,65 @@ export class TeamService extends BaseService<Team> {
         return super.create(createTaskDto)
     }
 
+  async getProjectsOfUser(userId: string) {
+    try {
+      // Find the user by ID and populate the 'teams' field
+      const user = await this.UserModel.findById(userId).populate('teams').exec();
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const projects: Project[] = [];
+      // Iterate through each team of the user
+      for (const team of user.teams) {
+        // Find the team by its ID and populate the 'projects' field
+        const populatedTeam = await this.TeamModel.findById(team).populate('projects').exec();
+
+        if (populatedTeam) {
+          for (const project of populatedTeam.project) {
+            // Add projects from the current team to the projects array
+            projects.push(project);
+          }
+        }
+
+        return projects;
+      }}
+    catch
+      (error)
+      {
+        throw new Error(error.message);
+      }
+    }
+
+
+  async getusersOfTeamProject(idP: string) {
+    try {
+      const project = await this.ProjectModel
+          .findById(idP)
+          .populate('teams')
+          .exec();
+      if (!project) {
+        throw new NotFoundException('Project not found');
+      }
+
+      const users: User[] = [];
+      for (const team of project.teams) {
+        const teamObject = await this.TeamModel
+            .findById(team)
+            .populate('users')
+            .exec();
+        if (!teamObject) {
+          throw new NotFoundException('Team not found');
+        }
+        users.push(...teamObject.users);
+      }
+
+      return users;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
     getAllTeams() {
         return super.findAll();
 

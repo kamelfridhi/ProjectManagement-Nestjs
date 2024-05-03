@@ -16,6 +16,8 @@ export class BaseService<T> {
     }
 
     async findAll(): Promise<T[]> {
+        return this.model.find();
+    } async findAlll(): Promise<T[]> {
         return this.model.find().populate('role').exec();
     }
 

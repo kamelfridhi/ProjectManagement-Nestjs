@@ -77,6 +77,9 @@ export class UserService extends BaseService<User> {
   getAllUsers() {
     return super.findAll();
   }
+  getAlllUsers() {
+    return super.findAlll();
+  }
 
 
 

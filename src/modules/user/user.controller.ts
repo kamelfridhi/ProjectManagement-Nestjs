@@ -120,6 +120,10 @@ export class UserController {
     getAllUsers() {
         return this.usersService.getAllUsers();
     }
+    @Get('alll')
+    getAlllUsers() {
+        return this.usersService.getAlllUsers();
+    }
     @Get('getUsersEtat/:etat')
     getUsersWithEtat(@Param('etat') etat: number) {
         return this.usersService.getUsersWithEtat(etat);
