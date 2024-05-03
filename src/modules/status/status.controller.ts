@@ -7,15 +7,21 @@ import {UpdateStatusDto} from "./dto/updateStatus.dto";
 export class StatusController {
     constructor(private readonly statusService: StatusService) {}
 
-    @Post(':projectId')
-    createStatus(@Body() createStatusDto: CreateStatusDto,@Param('projectId') projectId: string ) {
-        return this.statusService.createStatus(createStatusDto, projectId);
+    @Post(':sprintid')
+    createStatus(@Body() createStatusDto: CreateStatusDto,@Param('sprintid') sprintid: string ) {
+
+        return this.statusService.createStatus(createStatusDto, sprintid);
     }
 
 
     @Get()
     findAll() {
         return this.statusService.findAll();
+    }
+
+    @Get(':sprintid')
+    findAllbysprint(@Param('sprintid') sprintid: string) {
+        return this.statusService.findAllbysprint(sprintid);
     }
 
     @Get(':id')

@@ -3,6 +3,7 @@ import { UserRoles } from "./enums/user.roles";
 import { TaskStatus } from "./enums/task.status";
 import mongoose from "mongoose";
 import {Project} from "./project.schema";
+import {Sprint} from "./sprint.schema";
 
 @Schema()
 export class StatusOfTask{
@@ -10,8 +11,8 @@ export class StatusOfTask{
     @Prop({ required: false })
     status: TaskStatus;
 
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'Project',required:false})
-    project: Project;
+    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'Sprint',required:false})
+    sprint: string;
 
 
 

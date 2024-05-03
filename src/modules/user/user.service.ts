@@ -366,4 +366,9 @@ export class UserService extends BaseService<User> {
 
 
 
+  getteamUser(id: string) {
+    return super.findOne(id, ['settings', 'role', 'teams']);
+  }
+
+
 }

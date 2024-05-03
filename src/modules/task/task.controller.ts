@@ -17,6 +17,10 @@ export class TaskController {
         return this.taskService.getAllTasks();
     }
 
+    @Get('sprint/:idsprint')
+    getAllTasksbysprint(@Param('idsprint') id: string) {
+        return this.taskService.getAllTasksbysprint(id);
+    }
     @Get(':id')
     async getOneTask(@Param('id') id: string) {
         const task = await this.taskService.getOneTask(id);

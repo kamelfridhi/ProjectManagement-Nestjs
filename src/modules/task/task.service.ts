@@ -47,6 +47,11 @@ export class TaskService extends BaseService<Task> {
         return tasks;
     }
 
+    async getAllTasksbysprint(sprintid:string) {
+        const tasks = await this.taskModel.find({sprint:sprintid}).populate('status').exec();
+        return tasks;
+    }
+
     async getOneTask(id: string) {
         return this.findTaskById(id);
     }
