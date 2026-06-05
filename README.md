@@ -1,73 +1,58 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# TeamSphere API — REST & WebSocket backend for project management
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> Backend for TeamSphere, used by admins, project managers, and employees to manage projects, sprints, tasks, and tickets.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## What I built
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A modular NestJS API with JWT cookie auth, role-based access, and two Socket.io gateways — one for live admin user approval, one for team chat. MongoDB/Mongoose schemas cover users, teams, projects, sprints, tasks, statuses, tickets, and notifications. Emails are rendered with Pug and sent via Nodemailer.
 
-## Installation
+---
 
-```bash
-$ npm install
-```
+## Tech stack
 
-## Running the app
+**Backend:** NestJS 10, TypeScript, Passport, JWT, class-validator
+**Database:** MongoDB, Mongoose 8
+**Real-time:** Socket.io (@nestjs/websockets)
+**Other:** bcrypt, Multer, Nodemailer, Pug
+**DevOps:** Docker, Docker Compose
+
+---
+
+## Key features
+
+- JWT auth with HTTP-only cookies and bcrypt — tokens never exposed to client-side JavaScript
+- Role-based access (admin, projectManager, employee, client) with approve/decline/block workflows
+- Sprint-based tasks with configurable status columns and team member assignment
+- Real-time user verification — admin actions emit `Accepted` / `userdeclined` to the user's socket
+- Team chat, invitation notifications, and ticket support with Multer file uploads
+
+---
+
+## How to run it locally
 
 ```bash
-# development
-$ npm run start
+git clone <repo-url>
+cd ProjectManagement-Nestjs
+npm install
+docker compose up db -d
 
-# watch mode
-$ npm run start:dev
+# Seed roles before signup
+docker exec db mongo projectmanagement --eval "db.roles.insertMany([{role:'user'},{role:'admin'},{role:'employee'},{role:'development'},{role:'projectManager'},{role:'client'}])"
 
-# production mode
-$ npm run start:prod
+npm run start        # http://localhost:3000
+npm run twicedegro   # watch mode
 ```
 
-## Test
+Set `MONGODB_URI` to override `mongodb://127.0.0.1:27018/projectmanagement`. **Docker:** `docker compose up -d`
 
-```bash
-# unit tests
-$ npm run test
+---
 
-# e2e tests
-$ npm run test:e2e
+## Challenges
 
-# test coverage
-$ npm run test:cov
-```
+The hardest part was real-time account verification without polling. The gateway tracks each user's socket ID in memory and emits targeted events on admin accept/reject — so the frontend updates immediately. I paired that with JWT cookies and a separate chat gateway for team message broadcast.
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
